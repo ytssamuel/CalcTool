@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>房價折算試算工具（進階版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: #f8f9fa;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8em;
+      text-align: center;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 1.1em;
+    }
+    input, select {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.75em;
+      font-size: 1.1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 2em;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .download-btn {
+      background-color: #28a745;
+      margin-top: 1em;
+    }
+    .download-btn:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+  <h1>房價折算試算工具（進階版）</h1>
+
+  <label>
+    📍 選擇地區（自動填入總價）：
+    <select id="regionSelector" onchange="applyRegionPrice()">
+      <option value="">-- 選擇地區 --</option>
+      <option value="90">台北市（90萬/坪）</option>
+      <option value="50">新竹市（50萬/坪）</option>
+      <option value="35">高雄市（35萬/坪）</option>
+    </select>
+  </label>
+
+  <label>
+    坪數:
+    <input type="number" id="totalPings" placeholder="例如：30">
+  </label>
+
+  <label>
+    房屋總價（萬元）:
+    <input type="number" id="totalPrice" placeholder="例如：2400">
+  </label>
+
+  <label>
+    屋齡區段:
+    <select id="ageCategory">
+      <option value="1.0">預售屋（100%）</option>
+      <option value="0.9">10年內新屋（90%）</option>
+      <option value="0.8">10-20年屋（80%）</option>
+      <option value="0.7">20-30年屋（70%）</option>
+      <option value="0.6">40-50年屋（60%）</option>
+    </select>
+  </label>
+
+  <label>
+    💰 房貸利率（%）:
+    <input type="number" id="interestRate" placeholder="例如：2">
+  </label>
+
+  <label>
+    貸款年限（年）:
+    <input type="number" id="loanYears" placeholder="例如：30">
+  </label>
+
+  <button onclick="calculateBackwards()">計算折算結果</button>
+  <button class="download-btn" onclick="downloadCSV()">下載結果（CSV）</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const factors = {
+      '預售屋（100%）': 1.0,
+      '10年內新屋（90%）': 0.9,
+      '10-20年屋（80%）': 0.8,
+      '20-30年屋（70%）': 0.7,
+      '40-50年屋（60%）': 0.6
+    };
+
+    function applyRegionPrice() {
+      const pings = parseFloat(document.getElementById('totalPings').value);
+      const perPing = parseFloat(document.getElementById('regionSelector').value);
+      if (!isNaN(pings) && !isNaN(perPing)) {
+        document.getElementById('totalPrice').value = (pings * perPing).toFixed(0);
+      }
+    }
+
+    let cachedData = [];
+
+    function calculateBackwards() {
+      const totalPrice = parseFloat(document.getElementById('totalPrice').value);
+      const totalPings = parseFloat(document.getElementById('totalPings').value);
+      const selectedFactor = parseFloat(document.getElementById('ageCategory').value);
+      const rate = parseFloat(document.getElementById('interestRate').value) / 100 / 12;
+      const years = parseFloat(document.getElementById('loanYears').value);
+      const months = years * 12;
+
+      if (isNaN(totalPrice) || isNaN(totalPings) || totalPings === 0) {
+        document.getElementById('result').innerText = '請輸入有效的總價與坪數';
+        return;
+      }
+
+      const selectedPerPing = totalPrice / totalPings;
+      const originalPerPing = selectedPerPing / selectedFactor;
+
+      let tableRows = '';
+      cachedData = [];
+
+      for (const [label, factor] of Object.entries(factors)) {
+        const adjustedPerPing = originalPerPing * factor;
+        const adjustedTotalPrice = adjustedPerPing * totalPings;
+        const loanAmount = adjustedTotalPrice * 10000;
+        const monthlyPayment = rate === 0 ? loanAmount / months :
+          loanAmount * rate / (1 - Math.pow(1 + rate, -months));
+        cachedData.push({
+          type: label,
+          perPing: adjustedPerPing.toFixed(2),
+          total: adjustedTotalPrice.toFixed(0),
+          monthly: Math.round(monthlyPayment).toLocaleString()
+        });
+        tableRows += `<tr><td>${label}</td><td>${adjustedPerPing.toFixed(2)}</td><td>${adjustedTotalPrice.toFixed(0)}</td><td>${Math.round(monthlyPayment).toLocaleString()}</td></tr>`;
+      }
+
+      document.getElementById('result').innerHTML = `
+        <table>
+          <thead><tr><th>屋齡區段</th><th>單坪價（萬）</th><th>總價（萬）</th><th>月付（估）</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      `;
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+      let csvContent = '屋齡區段,單坪價格（萬）,總價（萬）,月付（估）\n';
+      cachedData.forEach(row => {
+        csvContent += `${row.type},${row.perPing},${row.total},${row.monthly}\n`;
+      });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '房價折算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
