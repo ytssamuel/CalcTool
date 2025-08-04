@@ -3,12 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <title>房價折算試算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 2em; background: #f8f9fa; }
-    label, select, input, button { display: block; margin: 1em 0; font-size: 1.1em; }
-    .result { margin-top: 2em; font-weight: bold; font-size: 1.2em; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: center; }
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: #f8f9fa;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8em;
+      text-align: center;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 1.1em;
+    }
+    input, select {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 0.75em;
+      font-size: 1.1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 2em;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .download-btn {
+      background-color: #28a745;
+      margin-top: 1em;
+    }
+    .download-btn:hover {
+      background-color: #1e7e34;
+    }
   </style>
 </head>
 <body>
@@ -35,6 +88,7 @@
   </label>
 
   <button onclick="calculateBackwards()">計算折算結果</button>
+  <button class="download-btn" onclick="downloadCSV()">下載結果（CSV）</button>
 
   <div class="result" id="result"></div>
 
@@ -47,6 +101,8 @@
       '40-50年屋（60%）': 0.6
     };
 
+    let cachedData = [];
+
     function calculateBackwards() {
       const totalPrice = parseFloat(document.getElementById('totalPrice').value);
       const totalPings = parseFloat(document.getElementById('totalPings').value);
@@ -57,22 +113,50 @@
         return;
       }
 
-      const originalPerPing = (totalPrice / totalPings) / selectedFactor;
+      const selectedPerPing = totalPrice / totalPings;
+      const originalPerPing = selectedPerPing / selectedFactor;
 
       let tableRows = '';
+      cachedData = [];
+
       for (const [label, factor] of Object.entries(factors)) {
         const adjustedPerPing = originalPerPing * factor;
         const adjustedTotalPrice = adjustedPerPing * totalPings;
+        cachedData.push({
+          type: label,
+          perPing: adjustedPerPing.toFixed(2),
+          total: adjustedTotalPrice.toFixed(2)
+        });
         tableRows += `<tr><td>${label}</td><td>${adjustedPerPing.toFixed(2)}</td><td>${adjustedTotalPrice.toFixed(2)}</td></tr>`;
       }
 
       document.getElementById('result').innerHTML = `
-        原始推估單坪價格：約 <strong>${originalPerPing.toFixed(2)}</strong> 萬元<br>
+        原始推估單坪價格（以${(selectedFactor * 100).toFixed(0)}%折算回推）：<strong>${originalPerPing.toFixed(2)}</strong> 萬元<br>
         <table>
           <thead><tr><th>屋齡區段</th><th>折算單坪價格（萬）</th><th>折算總價（萬）</th></tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
       `;
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      let csvContent = '屋齡區段,折算單坪價格（萬）,折算總價（萬）\n';
+      cachedData.forEach(row => {
+        csvContent += `${row.type},${row.perPing},${row.total}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '房價折算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   </script>
 </body>

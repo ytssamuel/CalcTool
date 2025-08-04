@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>房價折算試算工具</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f8f9fa; }
+    label, select, input, button { display: block; margin: 1em 0; font-size: 1.1em; }
+    .result { margin-top: 2em; font-weight: bold; font-size: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>房價折算試算工具</h1>
+  <label>
+    房屋總價（萬元）:
+    <input type="number" id="totalPrice" placeholder="例如：2400">
+  </label>
+
+  <label>
+    坪數:
+    <input type="number" id="totalPings" placeholder="例如：30">
+  </label>
+
+  <label>
+    屋齡區段:
+    <select id="ageCategory">
+      <option value="1.0">預售屋（100%）</option>
+      <option value="0.9">10年內新屋（90%）</option>
+      <option value="0.8">10-20年屋（80%）</option>
+      <option value="0.7">20-30年屋（70%）</option>
+      <option value="0.6">40-50年屋（60%）</option>
+    </select>
+  </label>
+
+  <button onclick="calculateBackwards()">計算折算結果</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const factors = {
+      '預售屋（100%）': 1.0,
+      '10年內新屋（90%）': 0.9,
+      '10-20年屋（80%）': 0.8,
+      '20-30年屋（70%）': 0.7,
+      '40-50年屋（60%）': 0.6
+    };
+
+    function calculateBackwards() {
+      const totalPrice = parseFloat(document.getElementById('totalPrice').value);
+      const totalPings = parseFloat(document.getElementById('totalPings').value);
+      const selectedFactor = parseFloat(document.getElementById('ageCategory').value);
+
+      if (isNaN(totalPrice) || isNaN(totalPings) || totalPings === 0) {
+        document.getElementById('result').innerText = '請輸入有效的總價與坪數';
+        return;
+      }
+
+      const originalPerPing = (totalPrice / totalPings) / selectedFactor;
+
+      let tableRows = '';
+      for (const [label, factor] of Object.entries(factors)) {
+        const adjustedPerPing = originalPerPing * factor;
+        const adjustedTotalPrice = adjustedPerPing * totalPings;
+        tableRows += `<tr><td>${label}</td><td>${adjustedPerPing.toFixed(2)}</td><td>${adjustedTotalPrice.toFixed(2)}</td></tr>`;
+      }
+
+      document.getElementById('result').innerHTML = `
+        原始推估單坪價格：約 <strong>${originalPerPing.toFixed(2)}</strong> 萬元<br>
+        <table>
+          <thead><tr><th>屋齡區段</th><th>折算單坪價格（萬）</th><th>折算總價（萬）</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>
