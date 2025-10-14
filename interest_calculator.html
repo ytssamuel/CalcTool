@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>利率計算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: #f8f9fa;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8em;
+      text-align: center;
+      color: #333;
+    }
+    .input-group {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2em;
+    }
+    label {
+      display: block;
+      margin: 1em 0 0.5em 0;
+      font-weight: bold;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 0.75em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 1em;
+      font-size: 1.1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1.5em;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 2em;
+    }
+    .summary {
+      background: #e7f3ff;
+      padding: 1.5em;
+      border-radius: 4px;
+      margin-bottom: 2em;
+      border-left: 4px solid #007bff;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5em 0;
+      font-size: 1.1em;
+    }
+    .summary-item .label {
+      color: #555;
+    }
+    .summary-item .value {
+      font-weight: bold;
+      color: #007bff;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.75em;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #e9ecef;
+    }
+    .download-btn {
+      background-color: #28a745;
+      margin-top: 1em;
+    }
+    .download-btn:hover {
+      background-color: #1e7e34;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>💰 利率計算工具</h1>
+
+  <div class="input-group">
+    <label>
+      本金（元）:
+      <input type="number" id="principal" placeholder="例如：100000" value="100000">
+    </label>
+
+    <label>
+      年利率（%）:
+      <input type="number" id="interestRate" placeholder="例如：3.5" value="3.5" step="0.1">
+    </label>
+
+    <label>
+      投資年數:
+      <input type="number" id="years" placeholder="例如：10" value="10">
+    </label>
+
+    <button onclick="calculate()">計算收益</button>
+    <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+  </div>
+
+  <div class="result hidden" id="result">
+    <div class="summary">
+      <h2 style="margin-top: 0;">📊 總覽</h2>
+      <div class="summary-item">
+        <span class="label">初始本金：</span>
+        <span class="value" id="summaryPrincipal">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">年利率：</span>
+        <span class="value" id="summaryRate">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">投資年數：</span>
+        <span class="value" id="summaryYears">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">總收益：</span>
+        <span class="value" id="summaryProfit" style="color: #28a745; font-size: 1.3em;">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">最終金額：</span>
+        <span class="value" id="summaryFinal" style="color: #dc3545; font-size: 1.3em;">-</span>
+      </div>
+    </div>
+
+    <h2>📈 每年詳細收益</h2>
+    <div style="overflow-x: auto;">
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>年份</th>
+            <th>期初金額（元）</th>
+            <th>當年利息（元）</th>
+            <th>期末金額（元）</th>
+            <th>累計收益（元）</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let cachedData = [];
+
+    function calculate() {
+      const principal = parseFloat(document.getElementById('principal').value);
+      const rate = parseFloat(document.getElementById('interestRate').value) / 100;
+      const years = parseInt(document.getElementById('years').value);
+
+      if (isNaN(principal) || isNaN(rate) || isNaN(years) || principal <= 0 || years <= 0) {
+        alert('請輸入有效的數值！');
+        return;
+      }
+
+      let currentAmount = principal;
+      let tableRows = '';
+      cachedData = [];
+
+      for (let year = 1; year <= years; year++) {
+        const startAmount = currentAmount;
+        const interest = currentAmount * rate;
+        const endAmount = currentAmount + interest;
+        const totalProfit = endAmount - principal;
+
+        cachedData.push({
+          year: year,
+          startAmount: startAmount.toFixed(0),
+          interest: interest.toFixed(0),
+          endAmount: endAmount.toFixed(0),
+          totalProfit: totalProfit.toFixed(0)
+        });
+
+        tableRows += `
+          <tr>
+            <td>${year}</td>
+            <td>${startAmount.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td>${interest.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td>${endAmount.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td>${totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+          </tr>
+        `;
+
+        currentAmount = endAmount;
+      }
+
+      const finalAmount = currentAmount;
+      const totalProfit = finalAmount - principal;
+
+      // 更新總覽
+      document.getElementById('summaryPrincipal').textContent = principal.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('summaryRate').textContent = (rate * 100).toFixed(2) + ' %';
+      document.getElementById('summaryYears').textContent = years + ' 年';
+      document.getElementById('summaryProfit').textContent = totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryFinal').textContent = finalAmount.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+
+      // 更新表格
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果區域和下載按鈕
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const principal = parseFloat(document.getElementById('principal').value);
+      const rate = parseFloat(document.getElementById('interestRate').value);
+      const years = parseInt(document.getElementById('years').value);
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+      csvContent += '利率計算結果\n';
+      csvContent += `本金,${principal}\n`;
+      csvContent += `年利率,${rate}%\n`;
+      csvContent += `投資年數,${years}\n\n`;
+      csvContent += '年份,期初金額（元）,當年利息（元）,期末金額（元）,累計收益（元）\n';
+      
+      cachedData.forEach(row => {
+        csvContent += `${row.year},${row.startAmount},${row.interest},${row.endAmount},${row.totalProfit}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '利率計算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>

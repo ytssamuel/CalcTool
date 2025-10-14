@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>定期定額投資計算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: #f8f9fa;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8em;
+      text-align: center;
+      color: #333;
+    }
+    .input-group {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2em;
+    }
+    label {
+      display: block;
+      margin: 1em 0 0.5em 0;
+      font-weight: bold;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 0.75em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 1em;
+      font-size: 1.1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1.5em;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 2em;
+    }
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 8px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .summary h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.8em 0;
+      font-size: 1.1em;
+    }
+    .summary-item .label {
+      opacity: 0.9;
+    }
+    .summary-item .value {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    .highlight-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 4px;
+      margin-top: 1em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.75em;
+      text-align: center;
+      font-size: 0.95em;
+    }
+    th {
+      background-color: #667eea;
+      color: white;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #e9ecef;
+    }
+    .download-btn {
+      background-color: #28a745;
+      margin-top: 1em;
+    }
+    .download-btn:hover {
+      background-color: #1e7e34;
+    }
+    .hidden {
+      display: none;
+    }
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border-radius: 4px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+    .profit-positive {
+      color: #28a745;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 定期定額投資計算工具</h1>
+
+  <div class="input-group">
+    <label>
+      每月投入金額（元）:
+      <input type="number" id="monthlyAmount" placeholder="例如：10000" value="10000">
+    </label>
+
+    <label>
+      年利率（%）:
+      <input type="number" id="interestRate" placeholder="例如：5" value="5" step="0.1">
+    </label>
+
+    <label>
+      投資年數:
+      <input type="number" id="years" placeholder="例如：10" value="10">
+    </label>
+
+    <button onclick="calculate()">計算收益</button>
+    <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+  </div>
+
+  <div class="result hidden" id="result">
+    <div class="summary">
+      <h2>💎 投資成果總覽</h2>
+      <div class="summary-item">
+        <span class="label">每月投入：</span>
+        <span class="value" id="summaryMonthly">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">年利率：</span>
+        <span class="value" id="summaryRate">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">投資期間：</span>
+        <span class="value" id="summaryYears">-</span>
+      </div>
+      
+      <div class="highlight-box">
+        <div class="summary-item">
+          <span class="label">📥 累計投入本金：</span>
+          <span class="value" id="summaryTotalInvested">-</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">💰 累計利息收益：</span>
+          <span class="value" id="summaryProfit" style="font-size: 1.4em;">-</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">🎯 最終總資產：</span>
+          <span class="value" id="summaryFinal" style="font-size: 1.5em;">-</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">📈 投資報酬率：</span>
+          <span class="value" id="summaryROI">-</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>📈 每年詳細收益明細</h2>
+    <div class="table-container">
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>年份</th>
+            <th>期初餘額（元）</th>
+            <th>年度投入（元）</th>
+            <th>年度利息（元）</th>
+            <th>期末餘額（元）</th>
+            <th>累計投入（元）</th>
+            <th>累計收益（元）</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let cachedData = [];
+
+    function calculate() {
+      const monthlyAmount = parseFloat(document.getElementById('monthlyAmount').value);
+      const annualRate = parseFloat(document.getElementById('interestRate').value) / 100;
+      const years = parseInt(document.getElementById('years').value);
+
+      if (isNaN(monthlyAmount) || isNaN(annualRate) || isNaN(years) || monthlyAmount <= 0 || years <= 0) {
+        alert('請輸入有效的數值！');
+        return;
+      }
+
+      const monthlyRate = annualRate / 12;
+      let balance = 0;
+      let totalInvested = 0;
+      let tableRows = '';
+      cachedData = [];
+
+      for (let year = 1; year <= years; year++) {
+        const startBalance = balance;
+        let yearlyInvestment = 0;
+        let yearlyInterest = 0;
+
+        // 計算這一年12個月的情況
+        for (let month = 1; month <= 12; month++) {
+          // 先加上本月投入
+          balance += monthlyAmount;
+          yearlyInvestment += monthlyAmount;
+          totalInvested += monthlyAmount;
+          
+          // 計算本月利息
+          const monthInterest = balance * monthlyRate;
+          balance += monthInterest;
+          yearlyInterest += monthInterest;
+        }
+
+        const endBalance = balance;
+        const totalProfit = endBalance - totalInvested;
+
+        cachedData.push({
+          year: year,
+          startBalance: startBalance.toFixed(0),
+          yearlyInvestment: yearlyInvestment.toFixed(0),
+          yearlyInterest: yearlyInterest.toFixed(0),
+          endBalance: endBalance.toFixed(0),
+          totalInvested: totalInvested.toFixed(0),
+          totalProfit: totalProfit.toFixed(0)
+        });
+
+        tableRows += `
+          <tr>
+            <td><strong>${year}</strong></td>
+            <td>${startBalance.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td>${yearlyInvestment.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td class="profit-positive">${yearlyInterest.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td><strong>${endBalance.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</strong></td>
+            <td>${totalInvested.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td class="profit-positive">${totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+          </tr>
+        `;
+      }
+
+      const finalBalance = balance;
+      const totalProfit = finalBalance - totalInvested;
+      const roi = (totalProfit / totalInvested * 100).toFixed(2);
+
+      // 更新總覽
+      document.getElementById('summaryMonthly').textContent = monthlyAmount.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('summaryRate').textContent = (annualRate * 100).toFixed(2) + ' %';
+      document.getElementById('summaryYears').textContent = years + ' 年（' + (years * 12) + ' 個月）';
+      document.getElementById('summaryTotalInvested').textContent = totalInvested.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryProfit').textContent = totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryFinal').textContent = finalBalance.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryROI').textContent = roi + ' %';
+
+      // 更新表格
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果區域和下載按鈕
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const monthlyAmount = parseFloat(document.getElementById('monthlyAmount').value);
+      const rate = parseFloat(document.getElementById('interestRate').value);
+      const years = parseInt(document.getElementById('years').value);
+      const totalInvested = parseFloat(cachedData[cachedData.length - 1].totalInvested);
+      const finalBalance = parseFloat(cachedData[cachedData.length - 1].endBalance);
+      const totalProfit = parseFloat(cachedData[cachedData.length - 1].totalProfit);
+      const roi = (totalProfit / totalInvested * 100).toFixed(2);
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+      csvContent += '定期定額投資計算結果\n';
+      csvContent += `每月投入,${monthlyAmount}\n`;
+      csvContent += `年利率,${rate}%\n`;
+      csvContent += `投資年數,${years}\n`;
+      csvContent += `累計投入本金,${totalInvested}\n`;
+      csvContent += `累計利息收益,${totalProfit}\n`;
+      csvContent += `最終總資產,${finalBalance}\n`;
+      csvContent += `投資報酬率,${roi}%\n\n`;
+      csvContent += '年份,期初餘額（元）,年度投入（元）,年度利息（元）,期末餘額（元）,累計投入（元）,累計收益（元）\n';
+      
+      cachedData.forEach(row => {
+        csvContent += `${row.year},${row.startBalance},${row.yearlyInvestment},${row.yearlyInterest},${row.endBalance},${row.totalInvested},${row.totalProfit}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '定期定額投資結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
