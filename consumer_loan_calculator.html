@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>消費性貸款計算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
+  <style>
+    /* 頁面特定樣式 */
+    body {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+    
+    .container {
+      max-width: 1000px;
+      background: white;
+    }
+    
+    h1 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    
+    .summary-overview {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-overview h2 {
+      margin-top: 0;
+      color: white;
+      border: none;
+      text-align: center;
+      margin-bottom: 1.5em;
+    }
+    
+    .big-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
+      opacity: 0.95;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .loan-info-box {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+    }
+    
+    .loan-info-box h3 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #fcb69f;
+      padding-bottom: 0.5em;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1em;
+      margin-top: 1em;
+    }
+    
+    .info-item {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .info-label {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 0.3em;
+    }
+    
+    .info-value {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #f5576c;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    th, td {
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group-inline,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .big-number {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 消費性貸款計算工具</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 此工具可幫您試算消費性貸款的每月還款金額、總利息與總還款金額</p>
+      </div>
+
+      <div class="input-row">
+        <label>
+          貸款總額（元）:
+          <span class="label-hint">需要借貸的金額</span>
+        </label>
+        <input type="number" id="loanAmount" placeholder="例如：500000" value="500000">
+      </div>
+
+      <div class="input-row">
+        <label>
+          年利率（%）:
+          <span class="label-hint">銀行提供的貸款利率</span>
+        </label>
+        <input type="number" id="interestRate" placeholder="例如：3.5" value="3.5" step="0.01">
+      </div>
+
+      <div class="input-row">
+        <label>貸款期數:</label>
+        <div class="input-group-inline">
+          <div>
+            <input type="number" id="loanYears" placeholder="年數" value="5" min="0">
+            <span class="label-hint">年</span>
+          </div>
+          <div>
+            <input type="number" id="loanMonths" placeholder="月數" value="0" min="0" max="11">
+            <span class="label-hint">月（0-11）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">開始試算</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="result">
+      <div class="summary-overview">
+        <h2>🎯 貸款試算結果</h2>
+        <div class="big-number" id="monthlyPayment">-</div>
+        <div class="summary-subtitle">每月應繳金額（本息平均攤還）</div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">貸款總額</div>
+            <div class="stat-value" id="displayLoanAmount">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">總利息</div>
+            <div class="stat-value" id="totalInterest">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">總還款金額</div>
+            <div class="stat-value" id="totalPayment">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">貸款期數</div>
+            <div class="stat-value" id="loanPeriod">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loan-info-box">
+        <h3>📊 貸款資訊摘要</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">首期還款</div>
+            <div class="info-value" id="firstPayment">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">首期本金</div>
+            <div class="info-value" id="firstPrincipal">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">首期利息</div>
+            <div class="info-value" id="firstInterest">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">利息佔比</div>
+            <div class="info-value" id="interestRatio">-</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color: #333;">📈 還款明細表</h3>
+      <div class="table-container">
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>期數</th>
+              <th>本金（元）</th>
+              <th>利息（元）</th>
+              <th>月付金（元）</th>
+              <th>剩餘本金（元）</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cachedData = [];
+
+    function calculate() {
+      const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+      const interestRate = parseFloat(document.getElementById('interestRate').value);
+      const loanYears = parseInt(document.getElementById('loanYears').value) || 0;
+      const loanMonths = parseInt(document.getElementById('loanMonths').value) || 0;
+
+      if (isNaN(loanAmount) || isNaN(interestRate) || loanAmount <= 0 || interestRate < 0) {
+        alert('請輸入有效的貸款金額和利率！');
+        return;
+      }
+
+      const totalMonths = loanYears * 12 + loanMonths;
+      if (totalMonths <= 0) {
+        alert('請輸入有效的貸款期數！');
+        return;
+      }
+
+      // 計算月利率
+      const monthlyRate = interestRate / 100 / 12;
+
+      // 計算每月應繳金額（本息平均攤還）
+      let monthlyPayment;
+      if (monthlyRate > 0) {
+        monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths) / 
+                        (Math.pow(1 + monthlyRate, totalMonths) - 1);
+      } else {
+        // 利率為0的情況
+        monthlyPayment = loanAmount / totalMonths;
+      }
+
+      // 計算還款明細
+      cachedData = [];
+      let remainingPrincipal = loanAmount;
+      let totalInterestPaid = 0;
+
+      for (let month = 1; month <= totalMonths; month++) {
+        const interest = remainingPrincipal * monthlyRate;
+        const principal = monthlyPayment - interest;
+        remainingPrincipal -= principal;
+        totalInterestPaid += interest;
+
+        cachedData.push({
+          month: month,
+          principal: Math.round(principal),
+          interest: Math.round(interest),
+          payment: Math.round(monthlyPayment),
+          remaining: Math.round(Math.max(0, remainingPrincipal))
+        });
+      }
+
+      const totalPayment = loanAmount + totalInterestPaid;
+      const interestRatio = (totalInterestPaid / totalPayment * 100).toFixed(1);
+
+      // 更新總覽
+      document.getElementById('monthlyPayment').textContent = '$ ' + Math.round(monthlyPayment).toLocaleString('zh-TW');
+      document.getElementById('displayLoanAmount').textContent = loanAmount.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('totalInterest').textContent = Math.round(totalInterestPaid).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('totalPayment').textContent = Math.round(totalPayment).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('loanPeriod').textContent = `${loanYears}年${loanMonths}月`;
+
+      // 更新貸款資訊摘要
+      document.getElementById('firstPayment').textContent = cachedData[0].payment.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('firstPrincipal').textContent = cachedData[0].principal.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('firstInterest').textContent = cachedData[0].interest.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('interestRatio').textContent = interestRatio + ' %';
+
+      // 生成表格（顯示所有期數）
+      let tableRows = '';
+      
+      cachedData.forEach((data) => {
+        tableRows += `
+          <tr>
+            <td><strong>${data.month}</strong></td>
+            <td>${data.principal.toLocaleString('zh-TW')}</td>
+            <td>${data.interest.toLocaleString('zh-TW')}</td>
+            <td><strong>${data.payment.toLocaleString('zh-TW')}</strong></td>
+            <td>${data.remaining.toLocaleString('zh-TW')}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+      const interestRate = parseFloat(document.getElementById('interestRate').value);
+      const loanYears = parseInt(document.getElementById('loanYears').value) || 0;
+      const loanMonths = parseInt(document.getElementById('loanMonths').value) || 0;
+      const totalInterest = cachedData.reduce((sum, data) => sum + data.interest, 0);
+      const totalPayment = loanAmount + totalInterest;
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '消費性貸款計算結果\n';
+      csvContent += `貸款總額,${loanAmount}\n`;
+      csvContent += `年利率,${interestRate}%\n`;
+      csvContent += `貸款期數,${loanYears}年${loanMonths}月\n`;
+      csvContent += `每月應繳金額,${cachedData[0].payment}\n`;
+      csvContent += `總利息,${Math.round(totalInterest)}\n`;
+      csvContent += `總還款金額,${Math.round(totalPayment)}\n\n`;
+      csvContent += '期數,本金（元）,利息（元）,月付金（元）,剩餘本金（元）\n';
+      
+      cachedData.forEach(data => {
+        csvContent += `${data.month},${data.principal},${data.interest},${data.payment},${data.remaining}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '消費性貸款計算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
