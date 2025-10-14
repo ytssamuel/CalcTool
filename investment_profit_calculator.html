@@ -4,265 +4,125 @@
   <meta charset="UTF-8">
   <title>投資獲利率計算工具</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
   <style>
+    /* 頁面特定樣式 */
     body {
-      font-family: sans-serif;
-      padding: 2em;
       background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      min-height: 100vh;
-      margin: 0;
     }
+    
     .container {
       max-width: 1200px;
-      margin: auto;
-    }
-    h1 {
-      font-size: 2em;
-      text-align: center;
-      color: #333;
-      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
-      margin-bottom: 1em;
-    }
-    .input-group {
       background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-      margin-bottom: 2em;
     }
+    
+    h1 {
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
     .input-row {
       margin-bottom: 1.5em;
     }
-    label {
-      display: block;
-      margin-bottom: 0.5em;
-      font-weight: bold;
-      color: #333;
-      font-size: 1.05em;
-    }
+    
     .label-hint {
       font-weight: normal;
       color: #666;
       font-size: 0.9em;
       margin-left: 0.5em;
     }
-    input, select {
-      width: 100%;
-      padding: 0.75em;
-      border: 2px solid #e0e0e0;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 1em;
-      transition: border-color 0.3s;
+    
+    .item-container {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 0.5em;
     }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #43e97b;
+    
+    .item-container::-webkit-scrollbar {
+      width: 8px;
     }
-    .input-group-inline {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1em;
+    
+    .item-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
     }
-    .input-group-triple {
+    
+    .item-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      border-radius: 10px;
+    }
+    
+    .item-card {
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5em;
+      margin-bottom: 1em;
+      position: relative;
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+      border-bottom: 2px solid #43e97b;
+    }
+    
+    .item-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #00796b;
+    }
+    
+    .input-grid-three {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
       gap: 1em;
     }
-    button {
-      width: 100%;
-      padding: 1.2em;
-      font-size: 1.2em;
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 1em;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-    button:active {
-      transform: translateY(0);
-    }
-    .item-inputs {
-      background: #f8f9fa;
-      padding: 1.5em;
-      border-radius: 8px;
-      margin-bottom: 1em;
-      border-left: 4px solid #43e97b;
-    }
-    .item-inputs h4 {
-      margin-top: 0;
-      color: #333;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .remove-item-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 0.5em 1em;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-    .remove-item-btn:hover {
-      background: #c82333;
-    }
-    .add-item-btn {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      margin-bottom: 1em;
-    }
-    .result {
-      background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-      margin-top: 2em;
-    }
-    .summary {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      padding: 2em;
-      border-radius: 10px;
-      margin-bottom: 2em;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .summary h2 {
-      margin-top: 0;
-      font-size: 1.8em;
-      text-align: center;
-      margin-bottom: 1em;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    .big-number {
-      text-align: center;
-      font-size: 3em;
-      font-weight: bold;
-      margin: 0.5em 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    .summary-subtitle {
-      text-align: center;
-      font-size: 1.2em;
-      opacity: 0.95;
-    }
+    
     .summary-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 1em;
       margin-top: 1.5em;
     }
+    
     .summary-card {
-      background: rgba(255,255,255,0.2);
-      padding: 1em;
+      background: rgba(67, 233, 123, 0.1);
+      border: 1px solid rgba(67, 233, 123, 0.3);
       border-radius: 8px;
+      padding: 1.5em;
       text-align: center;
     }
+    
     .summary-card-title {
       font-size: 0.9em;
-      opacity: 0.9;
+      color: #666;
       margin-bottom: 0.5em;
     }
+    
     .summary-card-value {
       font-size: 1.5em;
       font-weight: bold;
+      color: #00796b;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 1em;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #dee2e6;
-      padding: 0.9em;
-      text-align: center;
-    }
-    th {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      color: white;
-      font-weight: bold;
-      font-size: 1.05em;
-      position: sticky;
-      top: 0;
-    }
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    tr:hover {
-      background-color: #e9ecef;
-    }
-    .profit-positive {
-      color: #28a745;
-      font-weight: bold;
-    }
-    .profit-negative {
-      color: #dc3545;
-      font-weight: bold;
-    }
-    .total-row {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
-      font-weight: bold;
-      font-size: 1.1em;
-      color: white;
-    }
-    .download-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      margin-top: 1em;
-    }
+    
     .hidden {
       display: none;
     }
-    .info-box {
-      background: #e7f3ff;
-      border-left: 4px solid #2196F3;
-      padding: 1em;
-      margin-bottom: 1.5em;
-      border-radius: 4px;
+    
+    th, td {
+      text-align: center;
     }
-    .info-box p {
-      margin: 0.5em 0;
-      color: #333;
-    }
-    .item-container {
-      max-height: 500px;
-      overflow-y: auto;
-      padding: 0.5em;
-      background: #f0f0f0;
-      border-radius: 8px;
-      margin-bottom: 1em;
-    }
-    .item-container::-webkit-scrollbar {
-      width: 10px;
-    }
-    .item-container::-webkit-scrollbar-track {
-      background: #e0e0e0;
-      border-radius: 10px;
-    }
-    .item-container::-webkit-scrollbar-thumb {
-      background: #43e97b;
-      border-radius: 10px;
-    }
-    .item-container::-webkit-scrollbar-thumb:hover {
-      background: #3acc6c;
-    }
+    
     @media (max-width: 768px) {
-      .input-group-inline, .input-group-triple, .summary-grid {
+      .input-grid-three {
         grid-template-columns: 1fr;
       }
-      .big-number {
-        font-size: 2em;
-      }
-      .item-container {
-        max-height: 400px;
+      
+      .summary-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -281,16 +141,26 @@
         <div id="itemInputsContainer"></div>
       </div>
 
-      <button class="add-item-btn" onclick="addItem()">➕ 新增項目</button>
-      <button onclick="calculate()">計算獲利</button>
-      <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      <div class="button-group">
+        <button class="btn-add" onclick="addItem()">➕ 新增項目</button>
+        <button class="btn-primary" onclick="calculate()">計算獲利</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
     </div>
 
-    <div class="result hidden" id="result">
-      <div class="summary">
+    <div class="hidden" id="result">
+      <div class="result-section">
         <h2>🎯 投資獲利總覽</h2>
-        <div class="big-number" id="totalProfit">-</div>
-        <div class="summary-subtitle" id="profitRate">總獲利率：-</div>
+        <div class="summary">
+          <div class="summary-item">
+            <div class="label">總獲利</div>
+            <div class="value text-success" id="totalProfit">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">獲利率</div>
+            <div class="value" id="profitRate">-</div>
+          </div>
+        </div>
         
         <div class="summary-grid">
           <div class="summary-card">
@@ -341,22 +211,22 @@
     function addItem() {
       itemCount++;
       const container = document.getElementById('itemInputsContainer');
-      const existingItems = container.querySelectorAll('.item-inputs');
+      const existingItems = container.querySelectorAll('.item-card');
       
       const itemDiv = document.createElement('div');
-      itemDiv.className = 'item-inputs';
+      itemDiv.className = 'item-card';
       itemDiv.id = `item-${itemCount}`;
       
       itemDiv.innerHTML = `
-        <h4>
-          <span>項目 ${existingItems.length + 1}</span>
-          <button class="remove-item-btn" onclick="removeItem(${itemCount})">🗑️ 刪除</button>
-        </h4>
+        <div class="item-header">
+          <span class="item-title">項目 ${existingItems.length + 1}</span>
+          <button class="btn-danger" onclick="removeItem(${itemCount})">🗑️ 刪除</button>
+        </div>
         <div class="input-row">
           <label>項目名稱:</label>
           <input type="text" id="name-${itemCount}" placeholder="例如：台積電、Apple股票、比特幣等" value="投資項目 ${existingItems.length + 1}">
         </div>
-        <div class="input-group-inline">
+        <div class="input-grid">
           <div class="input-row">
             <label>買入金額（元）:</label>
             <input type="number" id="buyPrice-${itemCount}" placeholder="例如：100000" value="100000">
@@ -390,16 +260,18 @@
     
     function renumberItems() {
       const container = document.getElementById('itemInputsContainer');
-      const existingItems = container.querySelectorAll('.item-inputs');
+      const existingItems = container.querySelectorAll('.item-card');
       existingItems.forEach((itemDiv, index) => {
-        const h4 = itemDiv.querySelector('h4 span');
-        h4.textContent = `項目 ${index + 1}`;
+        const titleSpan = itemDiv.querySelector('.item-title');
+        if (titleSpan) {
+          titleSpan.textContent = `項目 ${index + 1}`;
+        }
       });
     }
 
     function calculate() {
       // 收集所有項目資料
-      const itemInputs = document.querySelectorAll('.item-inputs');
+      const itemInputs = document.querySelectorAll('.item-card');
       if (itemInputs.length === 0) {
         alert('請至少新增一個投資項目！');
         return;

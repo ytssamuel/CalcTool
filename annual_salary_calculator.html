@@ -4,95 +4,45 @@
   <meta charset="UTF-8">
   <title>年薪計算工具</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
   <style>
+    /* 頁面特定樣式 */
     body {
-      font-family: sans-serif;
-      padding: 2em;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      margin: 0;
     }
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+    
     h1 {
-      font-size: 2em;
-      text-align: center;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-      margin-bottom: 1em;
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
     }
-    .input-group {
+    
+    .container {
       background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      margin-bottom: 2em;
+      margin-top: 0;
     }
+    
     .input-row {
       margin-bottom: 1.5em;
     }
-    label {
-      display: block;
-      margin-bottom: 0.5em;
-      font-weight: bold;
-      color: #333;
-      font-size: 1.05em;
-    }
+    
     .label-hint {
       font-weight: normal;
       color: #666;
       font-size: 0.9em;
       margin-left: 0.5em;
     }
-    input {
-      width: 100%;
-      padding: 0.75em;
-      border: 2px solid #e0e0e0;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 1em;
-      transition: border-color 0.3s;
+    
+    input[readonly] {
+      background-color: #e9ecef;
     }
-    input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
+    
     .input-group-inline {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1em;
     }
-    button {
-      width: 100%;
-      padding: 1.2em;
-      font-size: 1.2em;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 1em;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-    button:active {
-      transform: translateY(0);
-    }
-    .result {
-      background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      margin-top: 2em;
-    }
-    .summary {
+    
+    .summary-special {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       color: white;
       padding: 2em;
@@ -100,12 +50,16 @@
       margin-bottom: 2em;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .summary h2 {
+    
+    .summary-special h2 {
       margin-top: 0;
       font-size: 1.6em;
       text-align: center;
       margin-bottom: 1em;
+      color: white;
+      border: none;
     }
+    
     .big-number {
       text-align: center;
       font-size: 3em;
@@ -113,23 +67,27 @@
       margin: 0.5em 0;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
+    
     .summary-subtitle {
       text-align: center;
       font-size: 1.2em;
       opacity: 0.9;
     }
+    
     .breakdown {
       background: #f8f9fa;
       padding: 1.5em;
       border-radius: 8px;
       margin-top: 1.5em;
     }
+    
     .breakdown h3 {
       margin-top: 0;
       color: #333;
       font-size: 1.3em;
       margin-bottom: 1em;
     }
+    
     .breakdown-item {
       display: flex;
       justify-content: space-between;
@@ -137,6 +95,7 @@
       border-bottom: 1px solid #dee2e6;
       font-size: 1.1em;
     }
+    
     .breakdown-item:last-child {
       border-bottom: none;
       padding-top: 1em;
@@ -145,58 +104,29 @@
       font-weight: bold;
       font-size: 1.2em;
     }
+    
     .breakdown-item .label {
       color: #555;
     }
+    
     .breakdown-item .value {
       font-weight: bold;
       color: #667eea;
     }
+    
     .breakdown-item:last-child .value {
       color: #f5576c;
       font-size: 1.3em;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 1em;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #dee2e6;
-      padding: 0.9em;
-      text-align: center;
-    }
-    th {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-weight: bold;
-      font-size: 1.05em;
-    }
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    tr:hover {
-      background-color: #e9ecef;
-    }
-    .download-btn {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      margin-top: 1em;
-    }
+    
     .hidden {
       display: none;
     }
-    .info-box {
-      background: #e7f3ff;
-      border-left: 4px solid #2196F3;
-      padding: 1em;
-      margin-bottom: 1.5em;
-      border-radius: 4px;
+    
+    th, td {
+      text-align: center;
     }
-    .info-box p {
-      margin: 0.5em 0;
-      color: #333;
-    }
+    
     @media (max-width: 600px) {
       .input-group-inline {
         grid-template-columns: 1fr;
@@ -272,12 +202,14 @@
         </div>
       </div>
 
-      <button onclick="calculate()">計算年薪</button>
-      <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">計算年薪</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
     </div>
 
-    <div class="result hidden" id="result">
-      <div class="summary">
+    <div class="hidden" id="result">
+      <div class="summary-special">
         <h2>🎯 您的年度總收入</h2>
         <div class="big-number" id="totalAnnual">-</div>
         <div class="summary-subtitle">稅前年收入</div>

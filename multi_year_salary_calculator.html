@@ -4,263 +4,172 @@
   <meta charset="UTF-8">
   <title>多年度薪資計算工具</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
   <style>
+    /* 頁面特定樣式 */
     body {
-      font-family: sans-serif;
-      padding: 2em;
       background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      min-height: 100vh;
-      margin: 0;
     }
+    
     .container {
       max-width: 1200px;
-      margin: auto;
-    }
-    h1 {
-      font-size: 2em;
-      text-align: center;
-      color: #333;
-      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
-      margin-bottom: 1em;
-    }
-    .input-group {
       background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-      margin-bottom: 2em;
     }
+    
+    h1 {
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
     .input-row {
       margin-bottom: 1.5em;
     }
-    label {
-      display: block;
-      margin-bottom: 0.5em;
-      font-weight: bold;
-      color: #333;
-      font-size: 1.05em;
-    }
+    
     .label-hint {
       font-weight: normal;
       color: #666;
       font-size: 0.9em;
       margin-left: 0.5em;
     }
-    input, select {
-      width: 100%;
-      padding: 0.75em;
-      border: 2px solid #e0e0e0;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 1em;
-      transition: border-color 0.3s;
+    
+    .year-container {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 0.5em;
     }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #4facfe;
+    
+    .year-container::-webkit-scrollbar {
+      width: 8px;
     }
+    
+    .year-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .year-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 10px;
+    }
+    
+    .year-card {
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5em;
+      margin-bottom: 1em;
+      position: relative;
+    }
+    
+    .year-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+      border-bottom: 2px solid #a8edea;
+    }
+    
+    .year-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #00796b;
+    }
+    
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    input[readonly] {
+      background-color: #e9ecef;
+    }
+    
     .input-group-inline {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1em;
     }
+    
     .input-group-triple {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 1em;
     }
-    button {
-      width: 100%;
-      padding: 1.2em;
-      font-size: 1.2em;
+    
+    .summary-overview {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 1em;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-    button:active {
-      transform: translateY(0);
-    }
-    .year-inputs {
-      background: #f8f9fa;
-      padding: 1.5em;
-      border-radius: 8px;
-      margin-bottom: 1em;
-      border-left: 4px solid #4facfe;
-    }
-    .year-inputs h4 {
-      margin-top: 0;
-      color: #333;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .remove-year-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 0.5em 1em;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-    .remove-year-btn:hover {
-      background: #c82333;
-    }
-    .add-year-btn {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      margin-bottom: 1em;
-    }
-    .result {
-      background: white;
-      padding: 2em;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-      margin-top: 2em;
-    }
-    .summary {
-      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
       color: white;
       padding: 2em;
       border-radius: 10px;
       margin-bottom: 2em;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .summary h2 {
+    
+    .summary-overview h2 {
       margin-top: 0;
-      font-size: 1.8em;
+      color: white;
+      border: none;
       text-align: center;
-      margin-bottom: 1em;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 1.5em;
     }
+    
     .big-number {
-      text-align: center;
-      font-size: 3em;
+      font-size: 2.5em;
       font-weight: bold;
-      margin: 0.5em 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    .summary-subtitle {
       text-align: center;
-      font-size: 1.2em;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
       opacity: 0.95;
     }
-    .summary-grid {
+    
+    .stats-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1em;
-      margin-top: 1.5em;
     }
-    .summary-card {
+    
+    .stat-box {
       background: rgba(255,255,255,0.2);
       padding: 1em;
       border-radius: 8px;
       text-align: center;
     }
-    .summary-card-title {
+    
+    .stat-label {
       font-size: 0.9em;
       opacity: 0.9;
       margin-bottom: 0.5em;
     }
-    .summary-card-value {
+    
+    .stat-value {
       font-size: 1.5em;
       font-weight: bold;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 1em;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #dee2e6;
-      padding: 0.9em;
-      text-align: center;
-    }
-    th {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      font-weight: bold;
-      font-size: 1.05em;
-      position: sticky;
-      top: 0;
-    }
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    tr:hover {
-      background-color: #e9ecef;
-    }
-    .total-row {
-      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
-      font-weight: bold;
-      font-size: 1.1em;
-      color: white;
-    }
-    .download-btn {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      margin-top: 1em;
-    }
+    
     .hidden {
       display: none;
     }
-    .info-box {
-      background: #e7f3ff;
-      border-left: 4px solid #2196F3;
-      padding: 1em;
-      margin-bottom: 1.5em;
-      border-radius: 4px;
+    
+    th, td {
+      text-align: center;
     }
-    .info-box p {
-      margin: 0.5em 0;
-      color: #333;
-    }
-    .table-container {
-      max-height: 600px;
-      overflow-y: auto;
-      border-radius: 4px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-    }
-    .year-container {
-      max-height: 500px;
-      overflow-y: auto;
-      padding: 0.5em;
-      background: #f0f0f0;
-      border-radius: 8px;
-      margin-bottom: 1em;
-    }
-    .year-container::-webkit-scrollbar {
-      width: 10px;
-    }
-    .year-container::-webkit-scrollbar-track {
-      background: #e0e0e0;
-      border-radius: 10px;
-    }
-    .year-container::-webkit-scrollbar-thumb {
-      background: #4facfe;
-      border-radius: 10px;
-    }
-    .year-container::-webkit-scrollbar-thumb:hover {
-      background: #3a8cd9;
-    }
+    
     @media (max-width: 768px) {
-      .input-group-inline, .input-group-triple, .summary-grid {
+      .input-group-inline,
+      .input-group-triple {
         grid-template-columns: 1fr;
       }
-      .big-number {
-        font-size: 2em;
-      }
-      .year-container {
-        max-height: 400px;
+      
+      .input-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -309,33 +218,35 @@
         <div id="yearInputsContainer"></div>
       </div>
 
-      <button class="add-year-btn" onclick="addYear()">➕ 新增年度</button>
-      <button onclick="calculate()">計算總收入</button>
-      <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      <div class="button-group">
+        <button class="btn-add" onclick="addYear()">➕ 新增年度</button>
+        <button class="btn-primary" onclick="calculate()">計算總收入</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
     </div>
 
-    <div class="result hidden" id="result">
-      <div class="summary">
+    <div class="hidden" id="result">
+      <div class="summary-overview">
         <h2>🎯 多年度收入總覽</h2>
         <div class="big-number" id="totalIncome">-</div>
         <div class="summary-subtitle" id="yearRange">-</div>
         
-        <div class="summary-grid">
-          <div class="summary-card">
-            <div class="summary-card-title">計算年數</div>
-            <div class="summary-card-value" id="totalYears">-</div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">計算年數</div>
+            <div class="stat-value" id="totalYears">-</div>
           </div>
-          <div class="summary-card">
-            <div class="summary-card-title">平均年薪</div>
-            <div class="summary-card-value" id="avgAnnual">-</div>
+          <div class="stat-box">
+            <div class="stat-label">平均年薪</div>
+            <div class="stat-value" id="avgAnnual">-</div>
           </div>
-          <div class="summary-card">
-            <div class="summary-card-title">最高年薪</div>
-            <div class="summary-card-value" id="maxAnnual">-</div>
+          <div class="stat-box">
+            <div class="stat-label">最高年薪</div>
+            <div class="stat-value" id="maxAnnual">-</div>
           </div>
-          <div class="summary-card">
-            <div class="summary-card-title">最低年薪</div>
-            <div class="summary-card-value" id="minAnnual">-</div>
+          <div class="stat-box">
+            <div class="stat-label">最低年薪</div>
+            <div class="stat-value" id="minAnnual">-</div>
           </div>
         </div>
       </div>
@@ -379,7 +290,7 @@
       const container = document.getElementById('yearInputsContainer');
       
       // 獲取最後一個年度的資料
-      const existingYears = container.querySelectorAll('.year-inputs');
+      const existingYears = container.querySelectorAll('.year-card');
       let lastSalary = 40000;
       let lastMonths = 14;
       let lastHoliday = 0;
@@ -404,14 +315,14 @@
       }
       
       const yearDiv = document.createElement('div');
-      yearDiv.className = 'year-inputs';
+      yearDiv.className = 'year-card';
       yearDiv.id = `year-${yearCount}`;
       
       yearDiv.innerHTML = `
-        <h4>
-          <span>第 ${existingYears.length + 1} 年</span>
-          <button class="remove-year-btn" onclick="removeYear(${yearCount})">🗑️ 刪除</button>
-        </h4>
+        <div class="year-header">
+          <span class="year-title">第 ${existingYears.length + 1} 年</span>
+          <button class="btn-danger" onclick="removeYear(${yearCount})">🗑️ 刪除</button>
+        </div>
         <div class="input-group-inline">
           <div class="input-row">
             <label>每月底薪（元）:</label>
@@ -450,19 +361,30 @@
       
       container.appendChild(yearDiv);
       
-      // 自動計算時薪
-      document.getElementById(`salary-${yearCount}`).addEventListener('input', function() {
-        const salary = parseFloat(this.value);
-        if (!isNaN(salary) && salary > 0) {
-          document.getElementById(`hourly-${yearCount}`).value = (salary / 240).toFixed(0);
-        }
-      });
+      // 保存當前的 yearCount 值，避免閉包問題
+      const currentYearId = yearCount;
       
-      // 初始化時薪
-      const initialSalary = parseFloat(document.getElementById(`salary-${yearCount}`).value);
-      if (!isNaN(initialSalary) && initialSalary > 0) {
-        document.getElementById(`hourly-${yearCount}`).value = (initialSalary / 240).toFixed(0);
-      }
+      // 等待 DOM 更新後再綁定事件和初始化
+      setTimeout(() => {
+        const salaryInput = document.getElementById(`salary-${currentYearId}`);
+        const hourlyInput = document.getElementById(`hourly-${currentYearId}`);
+        
+        if (salaryInput && hourlyInput) {
+          // 自動計算時薪
+          salaryInput.addEventListener('input', function() {
+            const salary = parseFloat(this.value);
+            if (!isNaN(salary) && salary > 0) {
+              hourlyInput.value = (salary / 240).toFixed(0);
+            }
+          });
+          
+          // 初始化時薪
+          const initialSalary = parseFloat(salaryInput.value);
+          if (!isNaN(initialSalary) && initialSalary > 0) {
+            hourlyInput.value = (initialSalary / 240).toFixed(0);
+          }
+        }
+      }, 50);
       
       // 自動滾動到最底部
       const yearContainer = document.querySelector('.year-container');
@@ -484,10 +406,12 @@
     
     function renumberYears() {
       const container = document.getElementById('yearInputsContainer');
-      const existingYears = container.querySelectorAll('.year-inputs');
+      const existingYears = container.querySelectorAll('.year-card');
       existingYears.forEach((yearDiv, index) => {
-        const h4 = yearDiv.querySelector('h4 span');
-        h4.textContent = `第 ${index + 1} 年`;
+        const titleSpan = yearDiv.querySelector('.year-title');
+        if (titleSpan) {
+          titleSpan.textContent = `第 ${index + 1} 年`;
+        }
       });
     }
 
@@ -500,7 +424,7 @@
       }
 
       // 收集所有年度資料
-      const yearInputs = document.querySelectorAll('.year-inputs');
+      const yearInputs = document.querySelectorAll('.year-card');
       if (yearInputs.length === 0) {
         alert('請至少新增一個年度！');
         return;

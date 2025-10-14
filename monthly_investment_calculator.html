@@ -4,62 +4,14 @@
   <meta charset="UTF-8">
   <title>定期定額投資計算工具</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 2em;
-      background: #f8f9fa;
-      max-width: 900px;
-      margin: auto;
+    /* 頁面特定樣式 */
+    .hidden {
+      display: none;
     }
-    h1 {
-      font-size: 1.8em;
-      text-align: center;
-      color: #333;
-    }
-    .input-group {
-      background: white;
-      padding: 2em;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 2em;
-    }
-    label {
-      display: block;
-      margin: 1em 0 0.5em 0;
-      font-weight: bold;
-      color: #555;
-    }
-    input {
-      width: 100%;
-      padding: 0.75em;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 1em;
-    }
-    button {
-      width: 100%;
-      padding: 1em;
-      font-size: 1.1em;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 1.5em;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .result {
-      background: white;
-      padding: 2em;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-top: 2em;
-    }
-    .summary {
+    
+    .summary-special {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       padding: 2em;
@@ -67,100 +19,80 @@
       margin-bottom: 2em;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .summary h2 {
+    
+    .summary-special h2 {
       margin-top: 0;
-      font-size: 1.5em;
+      color: white;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
     }
-    .summary-item {
+    
+    .summary-special .summary-item {
       display: flex;
       justify-content: space-between;
       margin: 0.8em 0;
       font-size: 1.1em;
+      color: white;
     }
-    .summary-item .label {
+    
+    .summary-special .label {
       opacity: 0.9;
     }
-    .summary-item .value {
+    
+    .summary-special .value {
       font-weight: bold;
       font-size: 1.2em;
     }
+    
     .highlight-box {
       background: rgba(255,255,255,0.2);
       padding: 1em;
       border-radius: 4px;
       margin-top: 1em;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 1em;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.75em;
-      text-align: center;
-      font-size: 0.95em;
-    }
+    
     th {
-      background-color: #667eea;
-      color: white;
-      font-weight: bold;
       position: sticky;
       top: 0;
     }
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
+    
+    th, td {
+      text-align: center;
     }
-    tr:hover {
-      background-color: #e9ecef;
-    }
-    .download-btn {
-      background-color: #28a745;
-      margin-top: 1em;
-    }
-    .download-btn:hover {
-      background-color: #1e7e34;
-    }
-    .hidden {
-      display: none;
-    }
+    
     .table-container {
       max-height: 500px;
       overflow-y: auto;
-      border-radius: 4px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-    }
-    .profit-positive {
-      color: #28a745;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>📊 定期定額投資計算工具</h1>
+  <div class="container">
+    <h1>📊 定期定額投資計算工具</h1>
 
-  <div class="input-group">
-    <label>
-      每月投入金額（元）:
-      <input type="number" id="monthlyAmount" placeholder="例如：10000" value="10000">
-    </label>
+    <div class="input-group">
+      <label>
+        每月投入金額（元）:
+        <input type="number" id="monthlyAmount" placeholder="例如：10000" value="10000">
+      </label>
 
-    <label>
-      年利率（%）:
-      <input type="number" id="interestRate" placeholder="例如：5" value="5" step="0.1">
-    </label>
+      <label>
+        年利率（%）:
+        <input type="number" id="interestRate" placeholder="例如：5" value="5" step="0.1">
+      </label>
 
-    <label>
-      投資年數:
-      <input type="number" id="years" placeholder="例如：10" value="10">
-    </label>
+      <label>
+        投資年數:
+        <input type="number" id="years" placeholder="例如：10" value="10">
+      </label>
 
-    <button onclick="calculate()">計算收益</button>
-    <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
-  </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">計算收益</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
 
-  <div class="result hidden" id="result">
-    <div class="summary">
+    <div class="hidden" id="result">
+      <div class="summary-special">
       <h2>💎 投資成果總覽</h2>
       <div class="summary-item">
         <span class="label">每月投入：</span>
@@ -282,14 +214,14 @@
       const totalProfit = finalBalance - totalInvested;
       const roi = (totalProfit / totalInvested * 100).toFixed(2);
 
-      // 更新總覽
-      document.getElementById('summaryMonthly').textContent = monthlyAmount.toLocaleString('zh-TW') + ' 元';
-      document.getElementById('summaryRate').textContent = (annualRate * 100).toFixed(2) + ' %';
-      document.getElementById('summaryYears').textContent = years + ' 年（' + (years * 12) + ' 個月）';
-      document.getElementById('summaryTotalInvested').textContent = totalInvested.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
-      document.getElementById('summaryProfit').textContent = totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
-      document.getElementById('summaryFinal').textContent = finalBalance.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
-      document.getElementById('summaryROI').textContent = roi + ' %';
+      // 更新總覽 - 使用 innerHTML 確保內容正確顯示
+      document.getElementById('summaryMonthly').innerHTML = monthlyAmount.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('summaryRate').innerHTML = (annualRate * 100).toFixed(2) + ' %';
+      document.getElementById('summaryYears').innerHTML = years + ' 年（' + (years * 12) + ' 個月）';
+      document.getElementById('summaryTotalInvested').innerHTML = totalInvested.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryProfit').innerHTML = totalProfit.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryFinal').innerHTML = finalBalance.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('summaryROI').innerHTML = roi + ' %';
 
       // 更新表格
       document.getElementById('resultBody').innerHTML = tableRows;
@@ -344,5 +276,6 @@
       }
     });
   </script>
+  </div>
 </body>
 </html>
