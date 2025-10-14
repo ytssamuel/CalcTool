@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>退休生活費計算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
+  <style>
+    /* 頁面特定樣式 */
+    body {
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 50%, #2BFF88 100%);
+    }
+    
+    .container {
+      max-width: 1000px;
+      background: white;
+    }
+    
+    h1 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    
+    .summary-overview {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-overview h2 {
+      margin-top: 0;
+      color: white;
+      border: none;
+      text-align: center;
+      margin-bottom: 1.5em;
+    }
+    
+    .big-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
+      opacity: 0.95;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .insight-box {
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 100%);
+      color: white;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+    }
+    
+    .insight-box h3 {
+      margin-top: 0;
+      color: white;
+      border: none;
+    }
+    
+    .insight-item {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    
+    .insight-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .insight-title {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+    }
+    
+    .insight-desc {
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    th, td {
+      text-align: center;
+    }
+    
+    .highlight-row {
+      background: #fff9e6 !important;
+      font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group-inline {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .big-number {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌴 退休生活費計算工具</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 此工具可幫您計算退休所需資金，考慮通貨膨脹因素，規劃安穩的退休生活</p>
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            目前年齡:
+            <span class="label-hint">歲</span>
+          </label>
+          <input type="number" id="currentAge" placeholder="例如：30" value="30" min="18" max="100">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            預計退休年齡:
+            <span class="label-hint">歲</span>
+          </label>
+          <input type="number" id="retirementAge" placeholder="例如：65" value="65" min="18" max="100">
+        </div>
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            每月生活費（元）:
+            <span class="label-hint">以現在的物價水準</span>
+          </label>
+          <input type="number" id="monthlyExpense" placeholder="例如：30000" value="30000">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            預期退休年數:
+            <span class="label-hint">退休後生活的年數</span>
+          </label>
+          <input type="number" id="retirementYears" placeholder="例如：25" value="25" min="1">
+        </div>
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            年通貨膨脹率（%）:
+            <span class="label-hint">台灣平均約 1.5-2%</span>
+          </label>
+          <input type="number" id="inflationRate" placeholder="例如：2" value="2" step="0.1">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            投資報酬率（%）:
+            <span class="label-hint">退休金投資年報酬率</span>
+          </label>
+          <input type="number" id="returnRate" placeholder="例如：4" value="4" step="0.1">
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">開始計算</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="result">
+      <div class="summary-overview">
+        <h2>🎯 退休資金需求</h2>
+        <div class="big-number" id="totalNeeded">-</div>
+        <div class="summary-subtitle">退休時需準備的總金額</div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">距離退休</div>
+            <div class="stat-value" id="yearsToRetirement">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">退休第一年月生活費</div>
+            <div class="stat-value" id="firstYearExpense">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">退休期間總支出</div>
+            <div class="stat-value" id="totalExpense">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">每月應存金額</div>
+            <div class="stat-value" id="monthlySaving">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <h3>💡 理財建議</h3>
+        <div class="insight-item">
+          <div class="insight-title">🎯 儲蓄目標</div>
+          <div class="insight-desc" id="savingGoal">-</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-title">📊 投資策略</div>
+          <div class="insight-desc" id="investmentStrategy">-</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-title">⚠️ 風險提醒</div>
+          <div class="insight-desc" id="riskWarning">-</div>
+        </div>
+      </div>
+
+      <h3 style="color: #333;">📈 退休生活費逐年明細</h3>
+      <div class="table-container">
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>退休年數</th>
+              <th>年齡</th>
+              <th>每月生活費（元）</th>
+              <th>年度支出（元）</th>
+              <th>累計支出（元）</th>
+              <th>剩餘資金（元）</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cachedData = [];
+
+    function calculate() {
+      const currentAge = parseInt(document.getElementById('currentAge').value);
+      const retirementAge = parseInt(document.getElementById('retirementAge').value);
+      const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
+      const retirementYears = parseInt(document.getElementById('retirementYears').value);
+      const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
+      const returnRate = parseFloat(document.getElementById('returnRate').value) / 100;
+
+      if (isNaN(currentAge) || isNaN(retirementAge) || isNaN(monthlyExpense) || 
+          isNaN(retirementYears) || isNaN(inflationRate) || isNaN(returnRate)) {
+        alert('請輸入所有必填欄位！');
+        return;
+      }
+
+      if (retirementAge <= currentAge) {
+        alert('退休年齡必須大於目前年齡！');
+        return;
+      }
+
+      if (monthlyExpense <= 0 || retirementYears <= 0) {
+        alert('請輸入有效的金額和年數！');
+        return;
+      }
+
+      const yearsToRetirement = retirementAge - currentAge;
+
+      // 計算退休時（第一年）的月生活費（考慮通膨）
+      const firstYearMonthlyExpense = monthlyExpense * Math.pow(1 + inflationRate, yearsToRetirement);
+      
+      // 計算退休期間每年的支出和所需資金
+      cachedData = [];
+      let cumulativeExpense = 0;
+      let totalExpense = 0;
+
+      // 先計算總支出（考慮通膨）
+      for (let year = 1; year <= retirementYears; year++) {
+        const age = retirementAge + year - 1;
+        const monthlyExp = firstYearMonthlyExpense * Math.pow(1 + inflationRate, year - 1);
+        const yearlyExp = monthlyExp * 12;
+        totalExpense += yearlyExp;
+      }
+
+      // 計算需要準備的退休金總額（考慮投資報酬）
+      let totalNeeded = 0;
+      let remainingFunds = 0;
+
+      // 使用年金現值公式計算所需資金
+      // 考慮通膨和投資報酬的實際報酬率
+      const realReturnRate = (1 + returnRate) / (1 + inflationRate) - 1;
+      
+      if (Math.abs(realReturnRate) < 0.0001) {
+        // 如果實際報酬率接近0，使用簡單總和
+        totalNeeded = firstYearMonthlyExpense * 12 * retirementYears;
+      } else {
+        // 使用成長年金現值公式
+        const firstYearExpense = firstYearMonthlyExpense * 12;
+        totalNeeded = firstYearExpense * (1 - Math.pow(1 + inflationRate, retirementYears) / Math.pow(1 + returnRate, retirementYears)) / (returnRate - inflationRate);
+      }
+
+      remainingFunds = totalNeeded;
+
+      // 生成每年明細
+      cumulativeExpense = 0;
+      for (let year = 1; year <= retirementYears; year++) {
+        const age = retirementAge + year - 1;
+        const monthlyExp = firstYearMonthlyExpense * Math.pow(1 + inflationRate, year - 1);
+        const yearlyExp = monthlyExp * 12;
+        
+        // 計算該年度開始時的資金（前一年剩餘資金投資成長）
+        if (year > 1) {
+          remainingFunds = remainingFunds * (1 + returnRate);
+        }
+        
+        // 扣除該年度支出
+        remainingFunds -= yearlyExp;
+        cumulativeExpense += yearlyExp;
+
+        cachedData.push({
+          year: year,
+          age: age,
+          monthlyExpense: Math.round(monthlyExp),
+          yearlyExpense: Math.round(yearlyExp),
+          cumulativeExpense: Math.round(cumulativeExpense),
+          remainingFunds: Math.round(remainingFunds)
+        });
+      }
+
+      // 計算每月應存金額（使用定期定額公式）
+      const monthsToRetirement = yearsToRetirement * 12;
+      const monthlyReturnRate = Math.pow(1 + returnRate, 1/12) - 1;
+      let monthlySaving = 0;
+      
+      if (monthlyReturnRate > 0.0001) {
+        monthlySaving = totalNeeded * monthlyReturnRate / (Math.pow(1 + monthlyReturnRate, monthsToRetirement) - 1);
+      } else {
+        monthlySaving = totalNeeded / monthsToRetirement;
+      }
+
+      // 更新總覽
+      document.getElementById('totalNeeded').textContent = '$ ' + Math.round(totalNeeded).toLocaleString('zh-TW');
+      document.getElementById('yearsToRetirement').textContent = yearsToRetirement + ' 年';
+      document.getElementById('firstYearExpense').textContent = Math.round(firstYearMonthlyExpense).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('totalExpense').textContent = Math.round(totalExpense).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('monthlySaving').textContent = Math.round(monthlySaving).toLocaleString('zh-TW') + ' 元';
+
+      // 更新理財建議
+      const savingGoalText = `從現在到退休前，您需要累積 ${Math.round(totalNeeded).toLocaleString('zh-TW')} 元。建議每月固定儲蓄 ${Math.round(monthlySaving).toLocaleString('zh-TW')} 元，並投資於年報酬率約 ${(returnRate * 100).toFixed(1)}% 的標的。`;
+      document.getElementById('savingGoal').textContent = savingGoalText;
+
+      const investmentStrategyText = `建議採取分散投資策略：股票型基金 ${returnRate >= 0.05 ? '60%' : '40%'}、債券型基金 ${returnRate >= 0.05 ? '30%' : '40%'}、現金或定存 ${returnRate >= 0.05 ? '10%' : '20%'}。隨著接近退休年齡，逐步降低股票比重，提高債券和現金比重。`;
+      document.getElementById('investmentStrategy').textContent = investmentStrategyText;
+
+      const riskWarningText = `通貨膨脹會持續侵蝕購買力，建議每年檢視退休計畫並適時調整。醫療費用通常會隨年齡增加，建議額外預留 20-30% 的緊急準備金。若投資報酬率低於預期，可能需要延後退休年齡或提高儲蓄金額。`;
+      document.getElementById('riskWarning').textContent = riskWarningText;
+
+      // 生成表格
+      let tableRows = '';
+      cachedData.forEach((data, index) => {
+        const rowClass = data.remainingFunds < 0 ? 'highlight-row' : '';
+        tableRows += `
+          <tr class="${rowClass}">
+            <td><strong>第 ${data.year} 年</strong></td>
+            <td>${data.age} 歲</td>
+            <td>${data.monthlyExpense.toLocaleString('zh-TW')}</td>
+            <td>${data.yearlyExpense.toLocaleString('zh-TW')}</td>
+            <td>${data.cumulativeExpense.toLocaleString('zh-TW')}</td>
+            <td>${data.remainingFunds.toLocaleString('zh-TW')}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const currentAge = parseInt(document.getElementById('currentAge').value);
+      const retirementAge = parseInt(document.getElementById('retirementAge').value);
+      const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
+      const retirementYears = parseInt(document.getElementById('retirementYears').value);
+      const inflationRate = parseFloat(document.getElementById('inflationRate').value);
+      const returnRate = parseFloat(document.getElementById('returnRate').value);
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '退休生活費計算結果\n';
+      csvContent += `目前年齡,${currentAge}\n`;
+      csvContent += `退休年齡,${retirementAge}\n`;
+      csvContent += `目前每月生活費,${monthlyExpense}\n`;
+      csvContent += `預期退休年數,${retirementYears}\n`;
+      csvContent += `通貨膨脹率,${inflationRate}%\n`;
+      csvContent += `投資報酬率,${returnRate}%\n\n`;
+      csvContent += '退休年數,年齡,每月生活費（元）,年度支出（元）,累計支出（元）,剩餘資金（元）\n';
+      
+      cachedData.forEach(data => {
+        csvContent += `第${data.year}年,${data.age},${data.monthlyExpense},${data.yearlyExpense},${data.cumulativeExpense},${data.remainingFunds}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '退休生活費計算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
