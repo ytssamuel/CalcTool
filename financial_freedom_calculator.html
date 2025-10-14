@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>財富自由計算器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
+  <style>
+    /* 頁面特定樣式 */
+    body {
+      background: linear-gradient(135deg, #FFD89B 0%, #19547B 100%);
+    }
+    
+    .container {
+      max-width: 1000px;
+      background: white;
+    }
+    
+    h1 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    
+    .summary-overview {
+      background: linear-gradient(135deg, #FFD89B 0%, #19547B 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-overview h2 {
+      margin-top: 0;
+      color: white;
+      border: none;
+      text-align: center;
+      margin-bottom: 1.5em;
+    }
+    
+    .big-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
+      opacity: 0.95;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .concept-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+    }
+    
+    .concept-box h3 {
+      margin-top: 0;
+      color: white;
+      border: none;
+    }
+    
+    .concept-item {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    
+    .concept-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .concept-title {
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+    }
+    
+    .concept-desc {
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+    
+    .strategy-box {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      border: 2px solid #FFD89B;
+    }
+    
+    .strategy-box h3 {
+      margin-top: 0;
+      color: #19547B;
+      border-bottom: 2px solid #FFD89B;
+      padding-bottom: 0.5em;
+    }
+    
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1em;
+      margin-top: 1em;
+    }
+    
+    .strategy-item {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .strategy-title {
+      font-weight: bold;
+      color: #19547B;
+      margin-bottom: 0.5em;
+    }
+    
+    .strategy-desc {
+      color: #666;
+      line-height: 1.6;
+      font-size: 0.95em;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .formula-box {
+      background: #e3f2fd;
+      padding: 1.5em;
+      border-radius: 8px;
+      margin: 1.5em 0;
+      border-left: 4px solid #2196F3;
+    }
+    
+    .formula-title {
+      font-weight: bold;
+      color: #1976D2;
+      margin-bottom: 0.8em;
+      font-size: 1.1em;
+    }
+    
+    .formula {
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 1em;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1.1em;
+      color: #333;
+    }
+    
+    .formula-explain {
+      margin-top: 0.8em;
+      color: #666;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group-inline,
+      .strategy-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .big-number {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 財富自由計算器</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 此工具可幫您計算達到財富自由所需的資產總額，讓被動收入支應您的生活開銷</p>
+      </div>
+
+      <div class="input-row">
+        <label>
+          每月生活費（元）:
+          <span class="label-hint">期望的月生活開銷</span>
+        </label>
+        <input type="number" id="monthlyExpense" placeholder="例如：50000" value="50000">
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            年通貨膨脹率（%）:
+            <span class="label-hint">台灣平均約 1.5-2%</span>
+          </label>
+          <input type="number" id="inflationRate" placeholder="例如：2" value="2" step="0.1">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            投資年報酬率（%）:
+            <span class="label-hint">預期的年化報酬率</span>
+          </label>
+          <input type="number" id="returnRate" placeholder="例如：6" value="6" step="0.1">
+        </div>
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            目前年齡:
+            <span class="label-hint">歲</span>
+          </label>
+          <input type="number" id="currentAge" placeholder="例如：30" value="30" min="18" max="100">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            目標達成年齡:
+            <span class="label-hint">計劃幾歲達成財富自由</span>
+          </label>
+          <input type="number" id="targetAge" placeholder="例如：45" value="45" min="18" max="100">
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label>
+          目前已有資產（元）:
+          <span class="label-hint">可選填，預設為 0</span>
+        </label>
+        <input type="number" id="currentAsset" placeholder="例如：1000000" value="0">
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">開始計算</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="result">
+      <div class="summary-overview">
+        <h2>🎯 財富自由目標</h2>
+        <div class="big-number" id="targetAmount">-</div>
+        <div class="summary-subtitle">達成財富自由所需資產總額</div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">每月被動收入</div>
+            <div class="stat-value" id="passiveIncome">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">年度被動收入</div>
+            <div class="stat-value" id="annualPassiveIncome">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">每月應存金額</div>
+            <div class="stat-value" id="monthlySaving">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">距離目標</div>
+            <div class="stat-value" id="yearsToTarget">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-title">💡 財富自由公式</div>
+        <div class="formula">
+          財富自由金額 = 年度生活費 ÷ 實質報酬率
+        </div>
+        <div class="formula-explain">
+          <strong>實質報酬率</strong> = 投資報酬率 - 通貨膨脹率<br>
+          當您的資產產生的被動收入（實質報酬）足以支應生活費時，即達到財富自由。<br>
+          本計算採用「4% 法則」的延伸概念，確保資產本金不會被侵蝕。
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <h3>💡 財富自由核心概念</h3>
+        <div class="concept-item">
+          <div class="concept-title">🎯 被動收入 ≥ 生活支出</div>
+          <div class="concept-desc">
+            財富自由的關鍵在於「被動收入能夠完全支應生活開銷」，而不需要動用本金。
+            這意味著您的資產投資報酬，扣除通膨影響後，能夠產生足夠的現金流支付所有生活費用。
+          </div>
+        </div>
+        <div class="concept-item">
+          <div class="concept-title">📊 資產永續性</div>
+          <div class="concept-desc">
+            本計算器採用保守策略，確保您的資產本金能夠永續存在。資產增值的部分用於：
+            (1) 抵抗通膨侵蝕、(2) 提供生活費、(3) 持續增長資產。這樣即使面對經濟波動，
+            您的財富自由狀態也能長期維持。
+          </div>
+        </div>
+        <div class="concept-item">
+          <div class="concept-title">🔄 實質報酬率</div>
+          <div class="concept-desc">
+            實質報酬率 = 投資報酬率 - 通膨率。例如：投資報酬率 6%、通膨率 2%，
+            實質報酬率為 4%。這 4% 才是真正能夠支應生活、維持購買力的收益。
+            計算時建議採用保守估計，確保目標可行。
+          </div>
+        </div>
+      </div>
+
+      <div class="strategy-box">
+        <h3>🎯 達成財富自由的策略建議</h3>
+        <div class="strategy-grid">
+          <div class="strategy-item">
+            <div class="strategy-title">📈 提高收入</div>
+            <div class="strategy-desc">
+              增加主動收入是最直接的方式。透過提升專業能力、轉換工作、發展副業等方式，
+              提高每月可投資金額。
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-title">💰 降低支出</div>
+            <div class="strategy-desc">
+              檢視消費習慣，區分需要與想要。降低非必要支出，
+              提高儲蓄率。每降低 10% 支出，財富自由目標就更容易達成。
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-title">📊 優化投資</div>
+            <div class="strategy-desc">
+              選擇適合的投資工具，平衡風險與報酬。長期投資指數型基金、
+              高股息股票、REITs 等，都是創造被動收入的好選擇。
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-title">⏰ 時間複利</div>
+            <div class="strategy-desc">
+              越早開始投資，複利效果越顯著。即使每月投入金額不大，
+              長期累積下來也能創造可觀的財富。
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-title">🎓 持續學習</div>
+            <div class="strategy-desc">
+              投資理財知識需要持續學習。了解市場動態、資產配置、
+              風險管理等，才能做出更明智的決策。
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-title">🛡️ 風險管理</div>
+            <div class="strategy-desc">
+              建立緊急預備金、購買適當保險、分散投資風險。
+              財富自由不只是累積資產，更要保護好已有的財富。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color: #333;">📊 資產成長路徑</h3>
+      <div id="growthPath"></div>
+    </div>
+  </div>
+
+  <script>
+    let cachedData = [];
+
+    function calculate() {
+      const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
+      const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
+      const returnRate = parseFloat(document.getElementById('returnRate').value) / 100;
+      const currentAge = parseInt(document.getElementById('currentAge').value);
+      const targetAge = parseInt(document.getElementById('targetAge').value);
+      const currentAsset = parseFloat(document.getElementById('currentAsset').value) || 0;
+
+      if (isNaN(monthlyExpense) || isNaN(inflationRate) || isNaN(returnRate) || 
+          isNaN(currentAge) || isNaN(targetAge)) {
+        alert('請輸入所有必填欄位！');
+        return;
+      }
+
+      if (targetAge <= currentAge) {
+        alert('目標達成年齡必須大於目前年齡！');
+        return;
+      }
+
+      if (monthlyExpense <= 0) {
+        alert('請輸入有效的月生活費！');
+        return;
+      }
+
+      if (returnRate <= inflationRate) {
+        alert('投資報酬率必須大於通膨率，才能實現財富自由！');
+        return;
+      }
+
+      const yearsToTarget = targetAge - currentAge;
+      
+      // 計算實質報酬率（扣除通膨後的真實報酬）
+      const realReturnRate = returnRate - inflationRate;
+      
+      // 計算年度生活費（當前物價）
+      const annualExpense = monthlyExpense * 12;
+      
+      // 財富自由所需金額 = 年度生活費 / 實質報酬率
+      // 這個金額的實質報酬剛好可以支應生活費，本金不會減少
+      const targetAmount = annualExpense / realReturnRate;
+      
+      // 考慮通膨，計算目標年齡時的生活費
+      const futureAnnualExpense = annualExpense * Math.pow(1 + inflationRate, yearsToTarget);
+      const futureTargetAmount = futureAnnualExpense / realReturnRate;
+      
+      // 計算每月應存金額
+      const monthsToTarget = yearsToTarget * 12;
+      const monthlyReturnRate = Math.pow(1 + returnRate, 1/12) - 1;
+      
+      // 考慮目前已有資產的未來值
+      const futureCurrentAsset = currentAsset * Math.pow(1 + returnRate, yearsToTarget);
+      const stillNeed = futureTargetAmount - futureCurrentAsset;
+      
+      let monthlySaving = 0;
+      if (stillNeed > 0) {
+        if (monthlyReturnRate > 0.0001) {
+          monthlySaving = stillNeed * monthlyReturnRate / (Math.pow(1 + monthlyReturnRate, monthsToTarget) - 1);
+        } else {
+          monthlySaving = stillNeed / monthsToTarget;
+        }
+      }
+
+      // 計算被動收入
+      const monthlyPassiveIncome = targetAmount * realReturnRate / 12;
+      const annualPassiveIncome = targetAmount * realReturnRate;
+
+      // 更新總覽
+      document.getElementById('targetAmount').textContent = '$ ' + Math.round(targetAmount).toLocaleString('zh-TW');
+      document.getElementById('passiveIncome').textContent = Math.round(monthlyPassiveIncome).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('annualPassiveIncome').textContent = Math.round(annualPassiveIncome).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('monthlySaving').textContent = Math.round(Math.max(0, monthlySaving)).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('yearsToTarget').textContent = yearsToTarget + ' 年';
+
+      // 生成資產成長路徑
+      let pathHTML = '<div class="table-container"><table><thead><tr>';
+      pathHTML += '<th>年齡</th><th>年度</th><th>累積資產（元）</th><th>年度生活費（元）</th>';
+      pathHTML += '<th>被動收入（元）</th><th>收入覆蓋率</th></tr></thead><tbody>';
+
+      cachedData = [];
+      let accumulatedAsset = currentAsset;
+
+      for (let year = 0; year <= yearsToTarget; year++) {
+        const age = currentAge + year;
+        const yearExpense = annualExpense * Math.pow(1 + inflationRate, year);
+        const passiveIncome = accumulatedAsset * realReturnRate;
+        const coverageRatio = accumulatedAsset > 0 ? (passiveIncome / yearExpense * 100) : 0;
+        
+        cachedData.push({
+          year: year,
+          age: age,
+          asset: Math.round(accumulatedAsset),
+          expense: Math.round(yearExpense),
+          passiveIncome: Math.round(passiveIncome),
+          coverageRatio: coverageRatio.toFixed(1)
+        });
+
+        const rowClass = coverageRatio >= 100 ? 'style="background: #e8f5e9;"' : '';
+        pathHTML += `<tr ${rowClass}>`;
+        pathHTML += `<td><strong>${age} 歲</strong></td>`;
+        pathHTML += `<td>第 ${year} 年</td>`;
+        pathHTML += `<td>${Math.round(accumulatedAsset).toLocaleString('zh-TW')}</td>`;
+        pathHTML += `<td>${Math.round(yearExpense).toLocaleString('zh-TW')}</td>`;
+        pathHTML += `<td>${Math.round(passiveIncome).toLocaleString('zh-TW')}</td>`;
+        pathHTML += `<td><strong>${coverageRatio.toFixed(1)}%</strong></td>`;
+        pathHTML += '</tr>';
+
+        // 計算下一年資產（資產增值 + 每月儲蓄）
+        if (year < yearsToTarget) {
+          accumulatedAsset = accumulatedAsset * (1 + returnRate) + monthlySaving * 12;
+        }
+      }
+
+      pathHTML += '</tbody></table></div>';
+      document.getElementById('growthPath').innerHTML = pathHTML;
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
+      const inflationRate = parseFloat(document.getElementById('inflationRate').value);
+      const returnRate = parseFloat(document.getElementById('returnRate').value);
+      const currentAge = parseInt(document.getElementById('currentAge').value);
+      const targetAge = parseInt(document.getElementById('targetAge').value);
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '財富自由計算結果\n';
+      csvContent += `每月生活費,${monthlyExpense}\n`;
+      csvContent += `通貨膨脹率,${inflationRate}%\n`;
+      csvContent += `投資報酬率,${returnRate}%\n`;
+      csvContent += `目前年齡,${currentAge}\n`;
+      csvContent += `目標年齡,${targetAge}\n\n`;
+      csvContent += '年齡,年度,累積資產（元）,年度生活費（元）,被動收入（元）,收入覆蓋率\n';
+      
+      cachedData.forEach(data => {
+        csvContent += `${data.age},第${data.year}年,${data.asset},${data.expense},${data.passiveIncome},${data.coverageRatio}%\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '財富自由計算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
