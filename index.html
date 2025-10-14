@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>計算工具集 - CaleTool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2em;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 3em;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .subtitle {
+      font-size: 1.3em;
+      opacity: 0.95;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2em;
+      margin-bottom: 3em;
+    }
+    .tool-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2em;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    .tool-icon {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+    .tool-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5em;
+    }
+    .tool-description {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1em;
+    }
+    .tool-features {
+      list-style: none;
+      padding: 0;
+    }
+    .tool-features li {
+      padding: 0.3em 0;
+      color: #555;
+      font-size: 0.9em;
+    }
+    .tool-features li:before {
+      content: "✓ ";
+      color: #28a745;
+      font-weight: bold;
+      margin-right: 0.5em;
+    }
+    .category {
+      margin-bottom: 3em;
+    }
+    .category-title {
+      color: white;
+      font-size: 2em;
+      margin-bottom: 1em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      border-bottom: 3px solid rgba(255,255,255,0.3);
+      padding-bottom: 0.5em;
+    }
+    footer {
+      text-align: center;
+      color: white;
+      margin-top: 3em;
+      padding: 2em 0;
+      border-top: 2px solid rgba(255,255,255,0.3);
+    }
+    footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    .tag {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.3em 0.8em;
+      border-radius: 20px;
+      font-size: 0.8em;
+      margin-right: 0.5em;
+      margin-top: 0.5em;
+    }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2em;
+      }
+      .subtitle {
+        font-size: 1.1em;
+      }
+      .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5em;
+      }
+      .category-title {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧮 CaleTool 計算工具集</h1>
+      <p class="subtitle">各種實用的線上計算工具，完全免費使用</p>
+    </header>
+
+    <div class="category">
+      <h2 class="category-title">💰 薪資計算工具</h2>
+      <div class="tools-grid">
+        <a href="annual_salary_calculator.html" class="tool-card">
+          <div class="tool-icon">💵</div>
+          <div class="tool-title">年薪計算工具</div>
+          <div class="tool-description">計算單一年度的總收入，包含底薪、獎金、加班費等各項收入明細。</div>
+          <ul class="tool-features">
+            <li>月薪與年終獎金計算</li>
+            <li>三節、績效、其他獎金</li>
+            <li>加班費自動計算</li>
+            <li>月度收入明細表</li>
+          </ul>
+          <div>
+            <span class="tag">單年度</span>
+            <span class="tag">詳細明細</span>
+          </div>
+        </a>
+
+        <a href="multi_year_salary_calculator.html" class="tool-card">
+          <div class="tool-icon">📊</div>
+          <div class="tool-title">多年度薪資計算工具</div>
+          <div class="tool-description">規劃職涯發展，計算多個年度的薪資變化與總收入。</div>
+          <ul class="tool-features">
+            <li>多年度薪資規劃</li>
+            <li>自訂底薪成長比例</li>
+            <li>動態新增/刪除年度</li>
+            <li>年齡與年份對照</li>
+          </ul>
+          <div>
+            <span class="tag">多年度</span>
+            <span class="tag">職涯規劃</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="category">
+      <h2 class="category-title">📈 投資理財工具</h2>
+      <div class="tools-grid">
+        <a href="interest_calculator.html" class="tool-card">
+          <div class="tool-icon">💰</div>
+          <div class="tool-title">利率計算工具</div>
+          <div class="tool-description">計算一次性投資本金的複利收益，適合存款或投資報酬評估。</div>
+          <ul class="tool-features">
+            <li>複利計算</li>
+            <li>每年收益明細</li>
+            <li>總收益統計</li>
+            <li>視覺化報表</li>
+          </ul>
+          <div>
+            <span class="tag">複利</span>
+            <span class="tag">單筆投資</span>
+          </div>
+        </a>
+
+        <a href="monthly_investment_calculator.html" class="tool-card">
+          <div class="tool-icon">📊</div>
+          <div class="tool-title">定期定額投資計算工具</div>
+          <div class="tool-description">計算每月定額投入的投資收益，適合長期投資規劃。</div>
+          <ul class="tool-features">
+            <li>月複利計算</li>
+            <li>年度收益明細</li>
+            <li>投資報酬率</li>
+            <li>累計投入追蹤</li>
+          </ul>
+          <div>
+            <span class="tag">定期定額</span>
+            <span class="tag">月複利</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="category">
+      <h2 class="category-title">🏠 房地產工具</h2>
+      <div class="tools-grid">
+        <a href="house_price_calc_updated.html" class="tool-card">
+          <div class="tool-icon">🏘️</div>
+          <div class="tool-title">房價折算試算工具</div>
+          <div class="tool-description">依據屋齡、坪數反推不同條件下的房價是否合理。</div>
+          <ul class="tool-features">
+            <li>屋齡折舊計算</li>
+            <li>單坪價格分析</li>
+            <li>地區價格參考</li>
+            <li>房貸月付試算</li>
+          </ul>
+          <div>
+            <span class="tag">房價評估</span>
+            <span class="tag">貸款試算</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <footer>
+      <p>💻 Made with ❤️ by <a href="https://github.com/ytssamuel" target="_blank">ytssamuel</a></p>
+      <p style="margin-top: 1em; font-size: 0.9em; opacity: 0.9;">
+        <a href="https://github.com/ytssamuel/CaleTool" target="_blank">📦 View on GitHub</a>
+      </p>
+      <p style="margin-top: 0.5em; font-size: 0.85em; opacity: 0.8;">
+        © 2025 CaleTool - 所有工具完全免費使用
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
