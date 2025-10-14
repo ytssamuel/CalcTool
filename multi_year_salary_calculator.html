@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>多年度薪資計算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 2em;
+      text-align: center;
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+      margin-bottom: 1em;
+    }
+    .input-group {
+      background: white;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      margin-bottom: 2em;
+    }
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-weight: bold;
+      color: #333;
+      font-size: 1.05em;
+    }
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.75em;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4facfe;
+    }
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    .input-group-triple {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 1.2em;
+      font-size: 1.2em;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1em;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .year-inputs {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-radius: 8px;
+      margin-bottom: 1em;
+      border-left: 4px solid #4facfe;
+    }
+    .year-inputs h4 {
+      margin-top: 0;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .remove-year-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .remove-year-btn:hover {
+      background: #c82333;
+    }
+    .add-year-btn {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      margin-bottom: 1em;
+    }
+    .result {
+      background: white;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      margin-top: 2em;
+    }
+    .summary {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .summary h2 {
+      margin-top: 0;
+      font-size: 1.8em;
+      text-align: center;
+      margin-bottom: 1em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .big-number {
+      text-align: center;
+      font-size: 3em;
+      font-weight: bold;
+      margin: 0.5em 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .summary-subtitle {
+      text-align: center;
+      font-size: 1.2em;
+      opacity: 0.95;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+      margin-top: 1.5em;
+    }
+    .summary-card {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .summary-card-title {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    .summary-card-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1em;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 0.9em;
+      text-align: center;
+    }
+    th {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 1.05em;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #e9ecef;
+    }
+    .total-row {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: white;
+    }
+    .download-btn {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      margin-top: 1em;
+    }
+    .hidden {
+      display: none;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 1em;
+      margin-bottom: 1.5em;
+      border-radius: 4px;
+    }
+    .info-box p {
+      margin: 0.5em 0;
+      color: #333;
+    }
+    .table-container {
+      max-height: 600px;
+      overflow-y: auto;
+      border-radius: 4px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+    .year-container {
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 0.5em;
+      background: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    .year-container::-webkit-scrollbar {
+      width: 10px;
+    }
+    .year-container::-webkit-scrollbar-track {
+      background: #e0e0e0;
+      border-radius: 10px;
+    }
+    .year-container::-webkit-scrollbar-thumb {
+      background: #4facfe;
+      border-radius: 10px;
+    }
+    .year-container::-webkit-scrollbar-thumb:hover {
+      background: #3a8cd9;
+    }
+    @media (max-width: 768px) {
+      .input-group-inline, .input-group-triple, .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .big-number {
+        font-size: 2em;
+      }
+      .year-container {
+        max-height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 多年度薪資計算工具</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 此工具可計算多個年度的薪資變化，適合規劃職涯發展或評估薪資成長</p>
+      </div>
+
+      <div class="input-row">
+        <label>
+          起始年齡:
+          <span class="label-hint">例如：25歲</span>
+        </label>
+        <input type="number" id="startAge" placeholder="例如：25" value="25">
+      </div>
+
+      <h3 style="margin-top: 2em; margin-bottom: 0.5em;">📈 新增年度時底薪調整設定</h3>
+      <div class="info-box" style="margin-top: 0;">
+        <p>💡 新增年度時，底薪將依據前一年的底薪自動調整：新底薪 = 前一年底薪 × (1 + 百分比) + 固定金額</p>
+      </div>
+      
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            底薪成長百分比（%）:
+            <span class="label-hint">例如：5 代表成長 5%</span>
+          </label>
+          <input type="number" id="salaryGrowthPercent" placeholder="例如：5" value="0" step="0.1">
+        </div>
+        <div class="input-row">
+          <label>
+            底薪固定增加（元）:
+            <span class="label-hint">例如：3000</span>
+          </label>
+          <input type="number" id="salaryGrowthFixed" placeholder="例如：3000" value="3000">
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2em;">📅 各年度薪資設定</h3>
+      <div class="year-container">
+        <div id="yearInputsContainer"></div>
+      </div>
+
+      <button class="add-year-btn" onclick="addYear()">➕ 新增年度</button>
+      <button onclick="calculate()">計算總收入</button>
+      <button class="download-btn hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+    </div>
+
+    <div class="result hidden" id="result">
+      <div class="summary">
+        <h2>🎯 多年度收入總覽</h2>
+        <div class="big-number" id="totalIncome">-</div>
+        <div class="summary-subtitle" id="yearRange">-</div>
+        
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-card-title">計算年數</div>
+            <div class="summary-card-value" id="totalYears">-</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">平均年薪</div>
+            <div class="summary-card-value" id="avgAnnual">-</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">最高年薪</div>
+            <div class="summary-card-value" id="maxAnnual">-</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">最低年薪</div>
+            <div class="summary-card-value" id="minAnnual">-</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color: #333;">📈 年度收入明細表</h3>
+      <div class="table-container">
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>年度</th>
+              <th>年齡</th>
+              <th>月薪（元）</th>
+              <th>年薪月數</th>
+              <th>三節獎金（元）</th>
+              <th>績效獎金（元）</th>
+              <th>其他獎金（元）</th>
+              <th>加班費（元）</th>
+              <th>年度總收入（元）</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let yearCount = 0;
+    let cachedData = [];
+
+    // 初始化：新增3個年度
+    window.onload = function() {
+      for (let i = 0; i < 3; i++) {
+        addYear();
+      }
+    };
+
+    function addYear() {
+      yearCount++;
+      const container = document.getElementById('yearInputsContainer');
+      
+      // 獲取最後一個年度的資料
+      const existingYears = container.querySelectorAll('.year-inputs');
+      let lastSalary = 40000;
+      let lastMonths = 14;
+      let lastHoliday = 0;
+      let lastPerformance = 0;
+      let lastOther = 0;
+      let lastOvertime = 0;
+      
+      if (existingYears.length > 0) {
+        const lastYear = existingYears[existingYears.length - 1];
+        const lastId = lastYear.id.split('-')[1];
+        lastSalary = parseFloat(document.getElementById(`salary-${lastId}`).value) || 40000;
+        lastMonths = parseFloat(document.getElementById(`months-${lastId}`).value) || 14;
+        lastHoliday = parseFloat(document.getElementById(`holiday-${lastId}`).value) || 0;
+        lastPerformance = parseFloat(document.getElementById(`performance-${lastId}`).value) || 0;
+        lastOther = parseFloat(document.getElementById(`other-${lastId}`).value) || 0;
+        lastOvertime = parseFloat(document.getElementById(`overtime-${lastId}`).value) || 0;
+        
+        // 根據設定計算新底薪：前一年底薪 × (1 + 百分比) + 固定金額
+        const growthPercent = parseFloat(document.getElementById('salaryGrowthPercent').value) || 0;
+        const growthFixed = parseFloat(document.getElementById('salaryGrowthFixed').value) || 0;
+        lastSalary = Math.round(lastSalary * (1 + growthPercent / 100) + growthFixed);
+      }
+      
+      const yearDiv = document.createElement('div');
+      yearDiv.className = 'year-inputs';
+      yearDiv.id = `year-${yearCount}`;
+      
+      yearDiv.innerHTML = `
+        <h4>
+          <span>第 ${existingYears.length + 1} 年</span>
+          <button class="remove-year-btn" onclick="removeYear(${yearCount})">🗑️ 刪除</button>
+        </h4>
+        <div class="input-group-inline">
+          <div class="input-row">
+            <label>每月底薪（元）:</label>
+            <input type="number" id="salary-${yearCount}" placeholder="例如：40000" value="${lastSalary}">
+          </div>
+          <div class="input-row">
+            <label>年薪月數:</label>
+            <input type="number" id="months-${yearCount}" placeholder="例如：14" value="${lastMonths}" step="0.5">
+          </div>
+        </div>
+        <div class="input-group-triple">
+          <div class="input-row">
+            <label>三節獎金（元）:</label>
+            <input type="number" id="holiday-${yearCount}" placeholder="例如：30000" value="${lastHoliday}">
+          </div>
+          <div class="input-row">
+            <label>績效獎金（元）:</label>
+            <input type="number" id="performance-${yearCount}" placeholder="例如：50000" value="${lastPerformance}">
+          </div>
+          <div class="input-row">
+            <label>其他獎金（元）:</label>
+            <input type="number" id="other-${yearCount}" placeholder="例如：20000" value="${lastOther}">
+          </div>
+        </div>
+        <div class="input-group-inline">
+          <div class="input-row">
+            <label>每月加班時數:</label>
+            <input type="number" id="overtime-${yearCount}" placeholder="例如：20" value="${lastOvertime}">
+          </div>
+          <div class="input-row">
+            <label>每小時時薪（元）:</label>
+            <input type="number" id="hourly-${yearCount}" placeholder="自動計算" readonly style="background-color: #f0f0f0;">
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(yearDiv);
+      
+      // 自動計算時薪
+      document.getElementById(`salary-${yearCount}`).addEventListener('input', function() {
+        const salary = parseFloat(this.value);
+        if (!isNaN(salary) && salary > 0) {
+          document.getElementById(`hourly-${yearCount}`).value = (salary / 240).toFixed(0);
+        }
+      });
+      
+      // 初始化時薪
+      const initialSalary = parseFloat(document.getElementById(`salary-${yearCount}`).value);
+      if (!isNaN(initialSalary) && initialSalary > 0) {
+        document.getElementById(`hourly-${yearCount}`).value = (initialSalary / 240).toFixed(0);
+      }
+      
+      // 自動滾動到最底部
+      const yearContainer = document.querySelector('.year-container');
+      if (yearContainer) {
+        setTimeout(() => {
+          yearContainer.scrollTop = yearContainer.scrollHeight;
+        }, 100);
+      }
+    }
+
+    function removeYear(id) {
+      const yearDiv = document.getElementById(`year-${id}`);
+      if (yearDiv) {
+        yearDiv.remove();
+        // 重新編號所有剩餘的年度
+        renumberYears();
+      }
+    }
+    
+    function renumberYears() {
+      const container = document.getElementById('yearInputsContainer');
+      const existingYears = container.querySelectorAll('.year-inputs');
+      existingYears.forEach((yearDiv, index) => {
+        const h4 = yearDiv.querySelector('h4 span');
+        h4.textContent = `第 ${index + 1} 年`;
+      });
+    }
+
+    function calculate() {
+      const startAge = parseInt(document.getElementById('startAge').value);
+      
+      if (isNaN(startAge) || startAge <= 0) {
+        alert('請輸入有效的起始年齡！');
+        return;
+      }
+
+      // 收集所有年度資料
+      const yearInputs = document.querySelectorAll('.year-inputs');
+      if (yearInputs.length === 0) {
+        alert('請至少新增一個年度！');
+        return;
+      }
+
+      cachedData = [];
+      let totalIncome = 0;
+      let maxAnnual = 0;
+      let minAnnual = Infinity;
+
+      yearInputs.forEach((yearDiv, index) => {
+        const id = yearDiv.id.split('-')[1];
+        const age = startAge + index;
+        const baseSalary = parseFloat(document.getElementById(`salary-${id}`).value) || 0;
+        const totalMonths = parseFloat(document.getElementById(`months-${id}`).value) || 12;
+        const holidayBonus = parseFloat(document.getElementById(`holiday-${id}`).value) || 0;
+        const performanceBonus = parseFloat(document.getElementById(`performance-${id}`).value) || 0;
+        const otherBonus = parseFloat(document.getElementById(`other-${id}`).value) || 0;
+        const overtimeHours = parseFloat(document.getElementById(`overtime-${id}`).value) || 0;
+        const hourlyRate = parseFloat(document.getElementById(`hourly-${id}`).value) || (baseSalary / 240);
+
+        // 計算年度收入
+        const monthlyIncome = baseSalary * 12;
+        const bonusMonths = totalMonths - 12;
+        const yearEndBonus = baseSalary * bonusMonths;
+        const monthlyOvertime = overtimeHours * hourlyRate * 1.34;
+        const yearlyOvertime = monthlyOvertime * 12;
+        const annualTotal = monthlyIncome + yearEndBonus + holidayBonus + performanceBonus + otherBonus + yearlyOvertime;
+
+        totalIncome += annualTotal;
+        maxAnnual = Math.max(maxAnnual, annualTotal);
+        minAnnual = Math.min(minAnnual, annualTotal);
+
+        cachedData.push({
+          year: index + 1,
+          age: age,
+          baseSalary: baseSalary,
+          totalMonths: totalMonths,
+          holidayBonus: holidayBonus,
+          performanceBonus: performanceBonus,
+          otherBonus: otherBonus,
+          yearlyOvertime: yearlyOvertime,
+          annualTotal: annualTotal
+        });
+      });
+
+      const avgAnnual = totalIncome / cachedData.length;
+      const startYear = new Date().getFullYear();
+      const endYear = startYear + cachedData.length - 1;
+
+      // 更新總覽
+      document.getElementById('totalIncome').textContent = '$ ' + totalIncome.toLocaleString('zh-TW', {maximumFractionDigits: 0});
+      document.getElementById('yearRange').textContent = `${startYear} - ${endYear} 年（${startAge} - ${startAge + cachedData.length - 1} 歲）`;
+      document.getElementById('totalYears').textContent = cachedData.length + ' 年';
+      document.getElementById('avgAnnual').textContent = avgAnnual.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('maxAnnual').textContent = maxAnnual.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+      document.getElementById('minAnnual').textContent = minAnnual.toLocaleString('zh-TW', {maximumFractionDigits: 0}) + ' 元';
+
+      // 生成表格
+      let tableRows = '';
+      cachedData.forEach((data, index) => {
+        const year = startYear + index;
+        tableRows += `
+          <tr>
+            <td><strong>${year}</strong></td>
+            <td>${data.age} 歲</td>
+            <td>${data.baseSalary.toLocaleString('zh-TW')}</td>
+            <td>${data.totalMonths}</td>
+            <td>${data.holidayBonus.toLocaleString('zh-TW')}</td>
+            <td>${data.performanceBonus.toLocaleString('zh-TW')}</td>
+            <td>${data.otherBonus.toLocaleString('zh-TW')}</td>
+            <td>${data.yearlyOvertime.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</td>
+            <td><strong>${data.annualTotal.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</strong></td>
+          </tr>
+        `;
+      });
+
+      // 加入總計行
+      tableRows += `
+        <tr class="total-row">
+          <td colspan="8"><strong>總計</strong></td>
+          <td><strong>${totalIncome.toLocaleString('zh-TW', {maximumFractionDigits: 0})}</strong></td>
+        </tr>
+      `;
+
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const startAge = parseInt(document.getElementById('startAge').value);
+      const startYear = new Date().getFullYear();
+      const totalIncome = cachedData.reduce((sum, data) => sum + data.annualTotal, 0);
+      const avgAnnual = totalIncome / cachedData.length;
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '多年度薪資計算結果\n';
+      csvContent += `起始年齡,${startAge}\n`;
+      csvContent += `計算年數,${cachedData.length}\n`;
+      csvContent += `總收入,${totalIncome.toFixed(0)}\n`;
+      csvContent += `平均年薪,${avgAnnual.toFixed(0)}\n\n`;
+      csvContent += '年度,年齡,月薪（元）,年薪月數,三節獎金（元）,績效獎金（元）,其他獎金（元）,加班費（元）,年度總收入（元）\n';
+      
+      cachedData.forEach((data, index) => {
+        const year = startYear + index;
+        csvContent += `${year},${data.age},${data.baseSalary},${data.totalMonths},${data.holidayBonus},${data.performanceBonus},${data.otherBonus},${data.yearlyOvertime.toFixed(0)},${data.annualTotal.toFixed(0)}\n`;
+      });
+
+      csvContent += `總計,,,,,,,, ${totalIncome.toFixed(0)}\n`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '多年度薪資計算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
