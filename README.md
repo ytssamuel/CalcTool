@@ -147,20 +147,7 @@ CaleTool 提供多種類型的計算工具，涵蓋薪資、投資理財、房�
 ## 🚀 快速開始
 
 ### 線上使用
-直接開啟 `index.html` 即可使用所有工具，無需安裝任何軟體。
-
-### 本地使用
-```bash
-# 克隆專案
-git clone https://github.com/ytssamuel/CaleTool.git
-
-# 進入目錄
-cd CaleTool
-
-# 使用瀏覽器開啟 index.html
-open index.html  # macOS
-start index.html # Windows
-```
+開啟[https://ytt-calc-tool.vercel.app](https://ytt-calc-tool.vercel.app)即可使用所有工具，無需安裝任何軟體。
 
 ## 📚 工具列表
 
