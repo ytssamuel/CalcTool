@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>房貸試算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="common-styles.css">
+  <style>
+    /* 頁面特定樣式 */
+    body {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .container {
+      max-width: 1200px;
+      background: white;
+    }
+    
+    h1 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    
+    .rate-type-selector {
+      display: flex;
+      gap: 1em;
+      margin-bottom: 1em;
+    }
+    
+    .rate-type-btn {
+      flex: 1;
+      padding: 0.8em;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1em;
+    }
+    
+    .rate-type-btn:hover {
+      border-color: #f093fb;
+    }
+    
+    .rate-type-btn.active {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border-color: #f093fb;
+    }
+    
+    .rate-section {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-radius: 8px;
+      margin-bottom: 1em;
+    }
+    
+    .rate-period {
+      background: white;
+      padding: 1em;
+      border-radius: 6px;
+      margin-bottom: 1em;
+      border: 1px solid #ddd;
+    }
+    
+    .rate-period-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8em;
+      padding-bottom: 0.5em;
+      border-bottom: 2px solid #f093fb;
+    }
+    
+    .rate-period-title {
+      font-weight: bold;
+      color: #f5576c;
+    }
+    
+    .summary-overview {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-overview h2 {
+      margin-top: 0;
+      color: white;
+      border: none;
+      text-align: center;
+      margin-bottom: 1.5em;
+    }
+    
+    .big-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
+      opacity: 0.95;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .payment-method-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+      margin-bottom: 1.5em;
+    }
+    
+    .payment-method-btn {
+      padding: 1em;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .payment-method-btn:hover {
+      border-color: #f093fb;
+    }
+    
+    .payment-method-btn.active {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border-color: #f093fb;
+    }
+    
+    .payment-method-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 0.3em;
+    }
+    
+    .payment-method-desc {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    th, td {
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group-inline,
+      .payment-method-selector {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .big-number {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏠 房貸試算工具</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 此工具可幫您試算房屋貸款，支援單一利率或分段利率，以及不同的還款方式</p>
+      </div>
+
+      <div class="input-group-inline">
+        <div class="input-row">
+          <label>
+            房屋總價（元）:
+            <span class="label-hint">房屋價格</span>
+          </label>
+          <input type="number" id="housePrice" placeholder="例如：10000000" value="10000000">
+        </div>
+        
+        <div class="input-row">
+          <label>
+            貸款成數（%）:
+            <span class="label-hint">通常為 70-80%</span>
+          </label>
+          <input type="number" id="loanRatio" placeholder="例如：80" value="80" min="1" max="100">
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label>貸款期數:</label>
+        <div class="input-group-inline">
+          <div>
+            <input type="number" id="loanYears" placeholder="年數" value="20" min="1">
+            <span class="label-hint">年</span>
+          </div>
+          <div>
+            <input type="number" id="loanMonths" placeholder="月數" value="0" min="0" max="11">
+            <span class="label-hint">月（0-11）</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2em;">📊 利率設定</h3>
+      <div class="rate-type-selector">
+        <button class="rate-type-btn active" onclick="setRateType('single')">單一利率</button>
+        <button class="rate-type-btn" onclick="setRateType('staged')">分段利率</button>
+      </div>
+
+      <div id="singleRateSection" class="rate-section">
+        <div class="input-row">
+          <label>
+            年利率（%）:
+            <span class="label-hint">例如：1.5</span>
+          </label>
+          <input type="number" id="singleRate" placeholder="例如：1.5" value="1.5" step="0.01">
+        </div>
+      </div>
+
+      <div id="stagedRateSection" class="rate-section hidden">
+        <div id="ratePeriods">
+          <div class="rate-period">
+            <div class="rate-period-header">
+              <span class="rate-period-title">第 1 段</span>
+              <button class="btn-danger btn-sm" onclick="removeRatePeriod(this)" style="display: none;">刪除</button>
+            </div>
+            <div class="input-group-inline">
+              <div class="input-row">
+                <label>期數（月）:</label>
+                <input type="number" class="period-months" placeholder="例如：24" value="24" min="1">
+              </div>
+              <div class="input-row">
+                <label>年利率（%）:</label>
+                <input type="number" class="period-rate" placeholder="例如：1.5" value="1.5" step="0.01">
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addRatePeriod()">➕ 新增利率段</button>
+      </div>
+
+      <h3 style="margin-top: 2em;">💳 還款方式</h3>
+      <div class="payment-method-selector">
+        <div class="payment-method-btn active" onclick="setPaymentMethod('amortization')">
+          <div class="payment-method-title">本息平均攤還</div>
+          <div class="payment-method-desc">每月還款金額固定</div>
+        </div>
+        <div class="payment-method-btn" onclick="setPaymentMethod('principal')">
+          <div class="payment-method-title">本金平均攤還</div>
+          <div class="payment-method-desc">本金固定，利息遞減</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">開始試算</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="result">
+      <div class="summary-overview">
+        <h2>🎯 貸款試算結果</h2>
+        <div class="big-number" id="loanAmount">-</div>
+        <div class="summary-subtitle">貸款總額</div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">首月還款金額</div>
+            <div class="stat-value" id="firstPayment">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">總利息</div>
+            <div class="stat-value" id="totalInterest">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">總還款金額</div>
+            <div class="stat-value" id="totalPayment">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">貸款期數</div>
+            <div class="stat-value" id="loanPeriod">-</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color: #333;">📈 還款明細表</h3>
+      <div class="table-container">
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>期數</th>
+              <th>本金（元）</th>
+              <th>利息（元）</th>
+              <th>月付金（元）</th>
+              <th>剩餘本金（元）</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rateType = 'single'; // 'single' or 'staged'
+    let paymentMethod = 'amortization'; // 'amortization' or 'principal'
+    let cachedData = [];
+    let ratePeriodCount = 1;
+
+    function setRateType(type) {
+      rateType = type;
+      
+      // 更新按鈕狀態
+      document.querySelectorAll('.rate-type-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // 顯示/隱藏對應區塊
+      if (type === 'single') {
+        document.getElementById('singleRateSection').classList.remove('hidden');
+        document.getElementById('stagedRateSection').classList.add('hidden');
+      } else {
+        document.getElementById('singleRateSection').classList.add('hidden');
+        document.getElementById('stagedRateSection').classList.remove('hidden');
+      }
+    }
+
+    function setPaymentMethod(method) {
+      paymentMethod = method;
+      
+      // 更新按鈕狀態
+      document.querySelectorAll('.payment-method-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.closest('.payment-method-btn').classList.add('active');
+    }
+
+    function addRatePeriod() {
+      ratePeriodCount++;
+      const container = document.getElementById('ratePeriods');
+      
+      const periodDiv = document.createElement('div');
+      periodDiv.className = 'rate-period';
+      periodDiv.innerHTML = `
+        <div class="rate-period-header">
+          <span class="rate-period-title">第 ${ratePeriodCount} 段</span>
+          <button class="btn-danger btn-sm" onclick="removeRatePeriod(this)">刪除</button>
+        </div>
+        <div class="input-group-inline">
+          <div class="input-row">
+            <label>期數（月）:</label>
+            <input type="number" class="period-months" placeholder="例如：24" value="24" min="1">
+          </div>
+          <div class="input-row">
+            <label>年利率（%）:</label>
+            <input type="number" class="period-rate" placeholder="例如：1.5" value="1.5" step="0.01">
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(periodDiv);
+      updateRatePeriodNumbers();
+    }
+
+    function removeRatePeriod(btn) {
+      btn.closest('.rate-period').remove();
+      ratePeriodCount--;
+      updateRatePeriodNumbers();
+    }
+
+    function updateRatePeriodNumbers() {
+      const periods = document.querySelectorAll('.rate-period');
+      periods.forEach((period, index) => {
+        const title = period.querySelector('.rate-period-title');
+        title.textContent = `第 ${index + 1} 段`;
+        
+        // 第一段不顯示刪除按鈕
+        const deleteBtn = period.querySelector('.btn-danger');
+        if (index === 0) {
+          deleteBtn.style.display = 'none';
+        } else {
+          deleteBtn.style.display = 'inline-block';
+        }
+      });
+    }
+
+    function calculate() {
+      const housePrice = parseFloat(document.getElementById('housePrice').value);
+      const loanRatio = parseFloat(document.getElementById('loanRatio').value);
+      const loanYears = parseInt(document.getElementById('loanYears').value) || 0;
+      const loanMonths = parseInt(document.getElementById('loanMonths').value) || 0;
+
+      if (isNaN(housePrice) || isNaN(loanRatio) || housePrice <= 0 || loanRatio <= 0) {
+        alert('請輸入有效的房屋總價和貸款成數！');
+        return;
+      }
+
+      const totalMonths = loanYears * 12 + loanMonths;
+      if (totalMonths <= 0) {
+        alert('請輸入有效的貸款期數！');
+        return;
+      }
+
+      const loanAmount = housePrice * (loanRatio / 100);
+
+      // 獲取利率設定
+      let rateSchedule = [];
+      if (rateType === 'single') {
+        const rate = parseFloat(document.getElementById('singleRate').value);
+        if (isNaN(rate) || rate <= 0) {
+          alert('請輸入有效的利率！');
+          return;
+        }
+        rateSchedule.push({ months: totalMonths, rate: rate });
+      } else {
+        const periods = document.querySelectorAll('.rate-period');
+        let totalPeriodMonths = 0;
+        
+        periods.forEach(period => {
+          const months = parseInt(period.querySelector('.period-months').value);
+          const rate = parseFloat(period.querySelector('.period-rate').value);
+          
+          if (isNaN(months) || isNaN(rate) || months <= 0 || rate <= 0) {
+            alert('請確認所有利率段的期數和利率都已正確填寫！');
+            return;
+          }
+          
+          rateSchedule.push({ months: months, rate: rate });
+          totalPeriodMonths += months;
+        });
+
+        if (totalPeriodMonths !== totalMonths) {
+          alert(`分段利率的總期數（${totalPeriodMonths}月）必須等於貸款期數（${totalMonths}月）！`);
+          return;
+        }
+      }
+
+      // 計算還款明細
+      cachedData = [];
+      let remainingPrincipal = loanAmount;
+      let totalInterestPaid = 0;
+      let currentPeriodIndex = 0;
+      let monthsInCurrentPeriod = 0;
+
+      for (let month = 1; month <= totalMonths; month++) {
+        // 判斷當前月份的利率
+        if (rateType === 'staged') {
+          while (monthsInCurrentPeriod >= rateSchedule[currentPeriodIndex].months && currentPeriodIndex < rateSchedule.length - 1) {
+            monthsInCurrentPeriod = 0;
+            currentPeriodIndex++;
+          }
+          monthsInCurrentPeriod++;
+        }
+
+        const currentRate = rateSchedule[currentPeriodIndex].rate;
+        const monthlyRate = currentRate / 100 / 12;
+
+        let principal, interest, monthlyPayment;
+
+        if (paymentMethod === 'amortization') {
+          // 本息平均攤還
+          const remainingMonths = totalMonths - month + 1;
+          monthlyPayment = remainingPrincipal * monthlyRate * Math.pow(1 + monthlyRate, remainingMonths) / 
+                          (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+          interest = remainingPrincipal * monthlyRate;
+          principal = monthlyPayment - interest;
+        } else {
+          // 本金平均攤還
+          principal = loanAmount / totalMonths;
+          interest = remainingPrincipal * monthlyRate;
+          monthlyPayment = principal + interest;
+        }
+
+        remainingPrincipal -= principal;
+        totalInterestPaid += interest;
+
+        cachedData.push({
+          month: month,
+          principal: Math.round(principal),
+          interest: Math.round(interest),
+          payment: Math.round(monthlyPayment),
+          remaining: Math.round(remainingPrincipal)
+        });
+      }
+
+      const totalPayment = loanAmount + totalInterestPaid;
+      const firstPayment = cachedData[0].payment;
+
+      // 更新總覽
+      document.getElementById('loanAmount').textContent = '$ ' + Math.round(loanAmount).toLocaleString('zh-TW');
+      document.getElementById('firstPayment').textContent = firstPayment.toLocaleString('zh-TW') + ' 元';
+      document.getElementById('totalInterest').textContent = Math.round(totalInterestPaid).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('totalPayment').textContent = Math.round(totalPayment).toLocaleString('zh-TW') + ' 元';
+      document.getElementById('loanPeriod').textContent = `${loanYears}年${loanMonths}月`;
+
+      // 生成表格（顯示所有期數）
+      let tableRows = '';
+      
+      cachedData.forEach((data) => {
+        tableRows += `
+          <tr>
+            <td><strong>${data.month}</strong></td>
+            <td>${data.principal.toLocaleString('zh-TW')}</td>
+            <td>${data.interest.toLocaleString('zh-TW')}</td>
+            <td><strong>${data.payment.toLocaleString('zh-TW')}</strong></td>
+            <td>${data.remaining.toLocaleString('zh-TW')}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('resultBody').innerHTML = tableRows;
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function downloadCSV() {
+      if (cachedData.length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      const housePrice = parseFloat(document.getElementById('housePrice').value);
+      const loanRatio = parseFloat(document.getElementById('loanRatio').value);
+      const loanAmount = housePrice * (loanRatio / 100);
+      const totalInterest = cachedData.reduce((sum, data) => sum + data.interest, 0);
+      const totalPayment = loanAmount + totalInterest;
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '房貸試算結果\n';
+      csvContent += `房屋總價,${housePrice}\n`;
+      csvContent += `貸款成數,${loanRatio}%\n`;
+      csvContent += `貸款金額,${Math.round(loanAmount)}\n`;
+      csvContent += `還款方式,${paymentMethod === 'amortization' ? '本息平均攤還' : '本金平均攤還'}\n`;
+      csvContent += `總利息,${Math.round(totalInterest)}\n`;
+      csvContent += `總還款金額,${Math.round(totalPayment)}\n\n`;
+      csvContent += '期數,本金（元）,利息（元）,月付金（元）,剩餘本金（元）\n';
+      
+      cachedData.forEach(data => {
+        csvContent += `${data.month},${data.principal},${data.interest},${data.payment},${data.remaining}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '房貸試算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
