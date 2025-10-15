@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>勞保退休金試算工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="stylesheet" href="common-styles.css">
+  <style>
+    /* 頁面特定樣式 */
+    body {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .container {
+      max-width: 1000px;
+      background: white;
+    }
+    
+    h1 {
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .input-row {
+      margin-bottom: 1.5em;
+    }
+    
+    .label-hint {
+      font-weight: normal;
+      color: #666;
+      font-size: 0.9em;
+      margin-left: 0.5em;
+    }
+    
+    .input-group-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+    }
+    
+    .pension-type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+      margin-bottom: 1.5em;
+    }
+    
+    .pension-type-btn {
+      padding: 1em;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .pension-type-btn:hover {
+      border-color: #4facfe;
+    }
+    
+    .pension-type-btn.active {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border-color: #4facfe;
+    }
+    
+    .pension-type-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 0.3em;
+    }
+    
+    .pension-type-desc {
+      font-size: 0.85em;
+      opacity: 0.8;
+    }
+    
+    .summary-overview {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-overview h2 {
+      margin-top: 0;
+      color: white;
+      border: none;
+      text-align: center;
+      margin-bottom: 1.5em;
+    }
+    
+    .big-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 0.5em 0;
+      color: white;
+    }
+    
+    .summary-subtitle {
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 1.5em;
+      color: white;
+      opacity: 0.95;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+    
+    .stat-box {
+      background: rgba(255,255,255,0.2);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 0.5em;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .info-card {
+      background: #e3f2fd;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+      border-left: 4px solid #2196F3;
+    }
+    
+    .info-card h3 {
+      margin-top: 0;
+      color: #1976D2;
+      border: none;
+    }
+    
+    .info-item {
+      margin-bottom: 1em;
+      line-height: 1.6;
+    }
+    
+    .info-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .formula-box {
+      background: #fff3e0;
+      padding: 1.5em;
+      border-radius: 8px;
+      margin: 1.5em 0;
+      border-left: 4px solid #ff9800;
+    }
+    
+    .formula-title {
+      font-weight: bold;
+      color: #f57c00;
+      margin-bottom: 0.8em;
+      font-size: 1.1em;
+    }
+    
+    .formula {
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 1em;
+      border-radius: 4px;
+      font-size: 1em;
+      color: #333;
+      line-height: 1.8;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group-inline,
+      .pension-type-selector {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .big-number {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💼 勞保退休金試算工具</h1>
+
+    <div class="input-group">
+      <div class="info-box">
+        <p>📌 根據台灣勞保制度，試算一次請領或年金給付金額</p>
+      </div>
+
+      <h3 style="margin-top: 1.5em; margin-bottom: 0.5em;">🎯 請領方式</h3>
+      <div class="pension-type-selector">
+        <div class="pension-type-btn active" onclick="setPensionType('lumpsum')">
+          <div class="pension-type-title">💰 一次請領</div>
+          <div class="pension-type-desc">一次領取全部金額</div>
+        </div>
+        <div class="pension-type-btn" onclick="setPensionType('annuity')">
+          <div class="pension-type-title">📅 年金給付</div>
+          <div class="pension-type-desc">按月領取至終老</div>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label>
+          投保年資（年）:
+          <span class="label-hint">加保總年數</span>
+        </label>
+        <input type="number" id="yearsInsured" placeholder="例如：25" value="25" min="0" step="0.1">
+      </div>
+
+      <div class="input-row">
+        <label>
+          平均月投保薪資（元）:
+          <span class="label-hint">最高 60 個月平均</span>
+        </label>
+        <input type="number" id="avgSalary" placeholder="例如：45800" value="45800" min="0">
+      </div>
+
+      <div id="annuityOptions" class="hidden">
+        <div class="input-group-inline">
+          <div class="input-row">
+            <label>
+              預估退休年齡:
+              <span class="label-hint">開始請領年齡</span>
+            </label>
+            <input type="number" id="retirementAge" placeholder="例如：65" value="65" min="50" max="75">
+          </div>
+          
+          <div class="input-row">
+            <label>
+              預估平均餘命:
+              <span class="label-hint">預計領取年數</span>
+            </label>
+            <input type="number" id="lifeExpectancy" placeholder="例如：20" value="20" min="5" max="40">
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="calculate()">開始試算</button>
+        <button class="btn-secondary hidden" id="downloadBtn" onclick="downloadCSV()">下載結果（CSV）</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="result">
+      <div class="summary-overview">
+        <h2 id="resultTitle">💰 試算結果</h2>
+        <div class="big-number" id="totalAmount">-</div>
+        <div class="summary-subtitle" id="amountSubtitle">-</div>
+        
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-title" id="formulaTitle">📐 計算公式</div>
+        <div class="formula" id="formulaContent"></div>
+      </div>
+
+      <div class="info-card">
+        <h3>ℹ️ 勞保老年給付說明</h3>
+        <div class="info-item">
+          <strong>📋 請領資格：</strong><br>
+          • 年滿 60 歲，保險年資合計滿 15 年，辦理離職退保者<br>
+          • 擔任具有危險、堅強體力等特殊性質之工作合計滿 15 年，年滿 55 歲，辦理離職退保者
+        </div>
+        <div class="info-item">
+          <strong>💰 一次請領：</strong><br>
+          • 年資未滿 1 年者，按實際加保月數發給<br>
+          • 年資滿 1 年者，每滿 1 年給付 1 個月，最高以 45 個月為限<br>
+          • 超過 60 歲以後之保險年資，最多以 5 年計
+        </div>
+        <div class="info-item">
+          <strong>📅 年金給付：</strong><br>
+          • 保險年資合計每滿 1 年，按平均月投保薪資 × 0.775% 計算<br>
+          • 超過 15 年部分，按平均月投保薪資 × 1.55% 計算<br>
+          • 60 歲以前請領，每提前 1 年減給 4%，最多減給 20%<br>
+          • 65 歲以後請領，每延後 1 年增給 4%，最多增給 20%
+        </div>
+        <div class="info-item">
+          <strong>📊 平均月投保薪資：</strong><br>
+          • 按加保期間最高 60 個月之月投保薪資平均計算<br>
+          • 2009年1月1日前有保險年資者，得選擇以加保期間最高 60 個月或退保當月起前 3 年平均計算
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let pensionType = 'lumpsum';
+    let cachedData = {};
+
+    function setPensionType(type) {
+      pensionType = type;
+      
+      // 更新按鈕狀態
+      document.querySelectorAll('.pension-type-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.closest('.pension-type-btn').classList.add('active');
+      
+      // 顯示/隱藏年金選項
+      if (type === 'annuity') {
+        document.getElementById('annuityOptions').classList.remove('hidden');
+      } else {
+        document.getElementById('annuityOptions').classList.add('hidden');
+      }
+    }
+
+    function calculate() {
+      const yearsInsured = parseFloat(document.getElementById('yearsInsured').value);
+      const avgSalary = parseFloat(document.getElementById('avgSalary').value);
+
+      if (isNaN(yearsInsured) || isNaN(avgSalary) || yearsInsured < 0 || avgSalary < 0) {
+        alert('請輸入有效的數值！');
+        return;
+      }
+
+      if (yearsInsured < 15 && pensionType === 'annuity') {
+        alert('年金給付需年資滿 15 年，請改選一次請領或增加年資！');
+        return;
+      }
+
+      if (pensionType === 'lumpsum') {
+        calculateLumpSum(yearsInsured, avgSalary);
+      } else {
+        const retirementAge = parseInt(document.getElementById('retirementAge').value);
+        const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value);
+        
+        if (isNaN(retirementAge) || isNaN(lifeExpectancy)) {
+          alert('請輸入有效的退休年齡與預估餘命！');
+          return;
+        }
+        
+        calculateAnnuity(yearsInsured, avgSalary, retirementAge, lifeExpectancy);
+      }
+
+      // 顯示結果
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
+    function calculateLumpSum(years, salary) {
+      // 一次請領：年資滿1年給付1個月，最高45個月
+      let months = Math.floor(years);
+      
+      // 超過45個月以45個月計
+      if (months > 45) {
+        months = 45;
+      }
+      
+      // 計算給付金額
+      const totalAmount = salary * months;
+      
+      // 儲存資料
+      cachedData = {
+        type: '一次請領',
+        years: years,
+        salary: salary,
+        months: months,
+        totalAmount: totalAmount
+      };
+      
+      // 更新顯示
+      document.getElementById('resultTitle').textContent = '💰 一次請領老年給付';
+      document.getElementById('totalAmount').textContent = '$ ' + Math.round(totalAmount).toLocaleString('zh-TW');
+      document.getElementById('amountSubtitle').textContent = '元（一次領取）';
+      
+      // 統計資訊
+      let statsHTML = `
+        <div class="stat-box">
+          <div class="stat-label">投保年資</div>
+          <div class="stat-value">${years.toFixed(1)} 年</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">給付月數</div>
+          <div class="stat-value">${months} 個月</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">平均月投保薪資</div>
+          <div class="stat-value">${salary.toLocaleString('zh-TW')} 元</div>
+        </div>
+      `;
+      document.getElementById('statsGrid').innerHTML = statsHTML;
+      
+      // 公式說明
+      document.getElementById('formulaTitle').textContent = '📐 一次請領計算公式';
+      document.getElementById('formulaContent').innerHTML = `
+        給付金額 = 平均月投保薪資 × 給付月數<br>
+        給付月數 = MIN(投保年資整數, 45)<br>
+        <br>
+        <strong>本次試算：</strong><br>
+        給付金額 = ${salary.toLocaleString('zh-TW')} × ${months}<br>
+        = <strong>${Math.round(totalAmount).toLocaleString('zh-TW')} 元</strong>
+      `;
+    }
+
+    function calculateAnnuity(years, salary, retirementAge, lifeYears) {
+      // 年金給付：前15年0.775%，超過15年1.55%
+      let rate1 = 0.00775; // 前15年
+      let rate2 = 0.0155;  // 超過15年
+      
+      let monthlyAmount = 0;
+      
+      if (years <= 15) {
+        monthlyAmount = salary * years * rate1;
+      } else {
+        monthlyAmount = salary * 15 * rate1 + salary * (years - 15) * rate2;
+      }
+      
+      // 調整係數（提前或延後請領）
+      let adjustmentFactor = 1.0;
+      let adjustmentNote = '';
+      
+      if (retirementAge < 60) {
+        const earlyYears = 60 - retirementAge;
+        adjustmentFactor = Math.max(0.8, 1 - earlyYears * 0.04); // 每年減4%，最多減20%
+        adjustmentNote = `（提前 ${earlyYears} 年請領，減給 ${((1 - adjustmentFactor) * 100).toFixed(0)}%）`;
+      } else if (retirementAge > 65) {
+        const delayYears = retirementAge - 65;
+        adjustmentFactor = Math.min(1.2, 1 + delayYears * 0.04); // 每年增4%，最多增20%
+        adjustmentNote = `（延後 ${delayYears} 年請領，增給 ${((adjustmentFactor - 1) * 100).toFixed(0)}%）`;
+      }
+      
+      monthlyAmount = monthlyAmount * adjustmentFactor;
+      
+      // 計算年度總額和終身總額
+      const annualAmount = monthlyAmount * 12;
+      const lifetimeTotal = monthlyAmount * 12 * lifeYears;
+      
+      // 儲存資料
+      cachedData = {
+        type: '年金給付',
+        years: years,
+        salary: salary,
+        retirementAge: retirementAge,
+        monthlyAmount: monthlyAmount,
+        annualAmount: annualAmount,
+        lifeYears: lifeYears,
+        lifetimeTotal: lifetimeTotal,
+        adjustmentFactor: adjustmentFactor,
+        adjustmentNote: adjustmentNote
+      };
+      
+      // 更新顯示
+      document.getElementById('resultTitle').textContent = '📅 老年年金給付';
+      document.getElementById('totalAmount').textContent = '$ ' + Math.round(monthlyAmount).toLocaleString('zh-TW');
+      document.getElementById('amountSubtitle').textContent = '元/月 ' + adjustmentNote;
+      
+      // 統計資訊
+      let statsHTML = `
+        <div class="stat-box">
+          <div class="stat-label">投保年資</div>
+          <div class="stat-value">${years.toFixed(1)} 年</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">年度總額</div>
+          <div class="stat-value">${Math.round(annualAmount).toLocaleString('zh-TW')} 元</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">預估餘命</div>
+          <div class="stat-value">${lifeYears} 年</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">終身預估總額</div>
+          <div class="stat-value">${Math.round(lifetimeTotal).toLocaleString('zh-TW')} 元</div>
+        </div>
+      `;
+      document.getElementById('statsGrid').innerHTML = statsHTML;
+      
+      // 公式說明
+      document.getElementById('formulaTitle').textContent = '📐 年金給付計算公式';
+      
+      let formula1 = '';
+      if (years <= 15) {
+        formula1 = `月領金額 = ${salary.toLocaleString('zh-TW')} × ${years.toFixed(1)} × 0.775%<br>
+                    = ${(salary * years * 0.00775).toFixed(0)} 元`;
+      } else {
+        formula1 = `月領金額 = ${salary.toLocaleString('zh-TW')} × 15 × 0.775% + ${salary.toLocaleString('zh-TW')} × ${(years - 15).toFixed(1)} × 1.55%<br>
+                    = ${(salary * 15 * 0.00775).toFixed(0)} + ${(salary * (years - 15) * 0.0155).toFixed(0)}<br>
+                    = ${(salary * years * 0.00775 + salary * (years > 15 ? years - 15 : 0) * 0.0155).toFixed(0)} 元`;
+      }
+      
+      document.getElementById('formulaContent').innerHTML = `
+        <strong>基本公式：</strong><br>
+        • 前 15 年：平均月投保薪資 × 年資 × 0.775%<br>
+        • 超過 15 年：平均月投保薪資 × 年資 × 1.55%<br>
+        <br>
+        <strong>本次試算：</strong><br>
+        ${formula1}<br>
+        ${adjustmentFactor !== 1.0 ? `<br>調整後月領金額 = ${(salary * years * 0.00775 + salary * (years > 15 ? years - 15 : 0) * 0.0155).toFixed(0)} × ${adjustmentFactor.toFixed(2)}<br>` : ''}
+        = <strong>${Math.round(monthlyAmount).toLocaleString('zh-TW')} 元/月</strong>
+      `;
+    }
+
+    function downloadCSV() {
+      if (!cachedData || Object.keys(cachedData).length === 0) {
+        alert('請先計算結果');
+        return;
+      }
+
+      let csvContent = '\uFEFF'; // UTF-8 BOM
+      csvContent += '勞保退休金試算結果\n';
+      csvContent += `請領方式,${cachedData.type}\n`;
+      csvContent += `投保年資,${cachedData.years} 年\n`;
+      csvContent += `平均月投保薪資,${cachedData.salary} 元\n\n`;
+      
+      if (cachedData.type === '一次請領') {
+        csvContent += `給付月數,${cachedData.months} 個月\n`;
+        csvContent += `給付總額,${Math.round(cachedData.totalAmount)} 元\n`;
+      } else {
+        csvContent += `退休年齡,${cachedData.retirementAge} 歲\n`;
+        csvContent += `每月年金,${Math.round(cachedData.monthlyAmount)} 元\n`;
+        csvContent += `年度總額,${Math.round(cachedData.annualAmount)} 元\n`;
+        csvContent += `預估餘命,${cachedData.lifeYears} 年\n`;
+        csvContent += `終身預估總額,${Math.round(cachedData.lifetimeTotal)} 元\n`;
+        if (cachedData.adjustmentNote) {
+          csvContent += `備註,${cachedData.adjustmentNote}\n`;
+        }
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', '勞保退休金試算結果.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 按 Enter 鍵也可以計算
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
+</body>
+</html>
