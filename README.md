@@ -354,10 +354,6 @@ CalcTool 提供多種類型的計算工具，涵蓋薪資、投資理財、房�
 - Edge
 - 其他現代瀏覽器
 
-## 🤝 貢獻
-
-歡迎提交 Issue 或 Pull Request！
-
 ## 📄 授權
 
 MIT License
